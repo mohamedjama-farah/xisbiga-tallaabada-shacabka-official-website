@@ -23,35 +23,35 @@ const particles = Array.from({ length: 30 }, (_, i) => {
 
 const slides = [
   {
-    img: '/somalia-fishing.jpg',
+    img: '/mogadishu-beach.jpg',
     accent: '#c9a227',
     en: {
-      eyebrow: 'Youth & Employment',
-      headline: ['Building', "Somalia's", 'Future'],
+      eyebrow: 'Mogadishu — Our Capital',
+      headline: ['Building', "Tomorrow's", 'Somalia'],
       gold: 1,
-      sub: '67% of Somali youth are unemployed. Thousands risk the Mediterranean crossing. XTS will create 500,000 jobs and open new hope at home.',
+      sub: 'From the shores of Mogadishu to every corner of Somalia — XTS stands for justice, unity and progress for every Somali citizen.',
     },
     so: {
-      eyebrow: 'Dhalinyarada & Shaqada',
-      headline: ['Mustaqbalka', 'Soomaaliya', 'Dhisaya'],
+      eyebrow: 'Muqdisho — Caasimaddeena',
+      headline: ['Dhisaya', 'Soomaaliya', 'Cusub'],
       gold: 2,
-      sub: '67% dhalinyarada Soomaaliyeed ayaa shaqo la\'a. Kumaan ayaa naftooda halis u gelinaya. XTS waxay abuuraysaa 500,000 shaqo.',
+      sub: 'Xeebaha Muqdisho ilaa geeska Soomaaliya — XTS waxay taageertaa cadaalad, midnimo iyo horumar muwaadin kasta.',
     },
   },
   {
-    img: '/somalia-river.jpg',
-    accent: '#22c55e',
+    img: '/mogadishu-aerial.jpg',
+    accent: '#3b82f6',
     en: {
-      eyebrow: 'Environment & Water',
-      headline: ['Protecting', 'Our Natural', 'Resources'],
+      eyebrow: 'A Nation Rising',
+      headline: ['One People,', 'One Somalia,', 'One Vision'],
       gold: 2,
-      sub: "Somalia's rivers, forests and coastlines are under threat. XTS invests in climate resilience, reforestation and clean water for every region.",
+      sub: 'Somalia has the longest coastline in Africa and unlimited potential. XTS will unlock that potential — with real plans, real jobs and real change.',
     },
     so: {
-      eyebrow: 'Deegaanka & Biyaha',
-      headline: ['Ilaalinaya', 'Khayraadka', 'Dabiiciga'],
+      eyebrow: 'Qarankii Kacaya',
+      headline: ['Dad Mideysan,', 'Soomaali Mideysan,', 'Hal Aragtood'],
       gold: 1,
-      sub: 'Webiyaasha, kaynta iyo xeebaha Soomaaliya waa halis. XTS waxay maalgelin doontaa adkaysiga cimilada iyo biyo nadiif ah.',
+      sub: 'Soomaaliya waxay leedahay xeebta ugu dheer Afrika iyo kartida aan xad lahayn. XTS waxay furaysaa kartidaas.',
     },
   },
 ];
@@ -101,17 +101,16 @@ export default function HeroSection() {
       <AnimatePresence mode="sync">
         <motion.div
           key={`bg-${safeSlide}`}
-          initial={{ opacity: 0, scale: 1.08 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 1.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+          transition={{ duration: 1.4, ease: 'easeInOut' }}
           className="absolute inset-0 z-0"
-          style={{ y: bgY }}
         >
-          <Image src={current.img} alt="Somalia" fill priority className="object-cover object-[center_65%]" sizes="100vw" />
+          <Image src={current.img} alt="Mogadishu Somalia" fill priority className="object-cover object-center" sizes="100vw" />
           {/* Multi-layer overlay for depth */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#040b1c]/95 via-[#040b1c]/75 to-[#040b1c]/30" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#040b1c] via-transparent to-[#040b1c]/40" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#040b1c]/90 via-[#040b1c]/65 to-[#040b1c]/25" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#040b1c] via-transparent to-[#040b1c]/30" />
         </motion.div>
       </AnimatePresence>
 

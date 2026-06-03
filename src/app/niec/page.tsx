@@ -94,10 +94,11 @@ export default function NIECPage() {
                 ? 'Always use the official NIEC website for registration deadlines, polling station locations, and official announcements.'
                 : 'Mar walba isticmaal bogga rasmiga ah ee NIEC xaaladaha dambayntanka diiwaangelinta, goobaha xarumaha codbixinta, iyo xayeysiisyada rasmiga ah.'}
             </p>
-            <a href="https://niec.so" target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-300 rounded-xl text-sm font-bold transition-colors">
-              <ExternalLink size={14} /> niec.so — {lang === 'en' ? 'Official NIEC Website' : 'Bogga Rasmiga NIEC'}
-            </a>
+            <p className="text-white/60 text-sm mt-1">
+              {lang === 'en'
+                ? 'Search "NIEC Somalia official website" on Google to find the current official address, or visit your nearest NIEC office in person.'
+                : 'Ka raadi "NIEC Somalia official website" Google-ka si aad u hesho cinwaanka rasmiga ah ee hadda, ama booqo xafiiska NIEC ee kuugu dhow.'}
+            </p>
           </div>
         </motion.div>
 
