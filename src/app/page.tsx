@@ -8,6 +8,7 @@ import GetInvolvedSection from '@/components/GetInvolvedSection';
 import CommunitySection from '@/components/CommunitySection';
 import LeadershipSection from '@/components/LeadershipSection';
 import NewsPreview from '@/components/NewsPreview';
+import FeaturedVideoSection from '@/components/FeaturedVideoSection';
 import NewsletterSection from '@/components/NewsletterSection';
 import JoinCTA from '@/components/JoinCTA';
 
@@ -24,6 +25,7 @@ export default function HomePage() {
       <CommunitySection />
       <LeadershipSection />
       <NewsPreview />
+      <FeaturedVideoSection />
       <MarqueeTicker />
       <NewsletterSection />
       <JoinCTA />

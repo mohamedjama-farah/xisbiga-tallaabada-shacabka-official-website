@@ -1,18 +1,23 @@
 'use client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
+import XTSLogo from '@/components/XTSLogo';
+import XTSLogoBolt from '@/components/XTSLogoBolt';
 import ImageUpload from '@/components/admin/ImageUpload';
 import {
   Users, MessageSquare, Newspaper, LogOut, CheckCircle2, XCircle,
   Clock, Mail, TrendingUp, Shield, Eye, Trash2, Menu, X, ChevronRight,
   Heart, UserCog, Edit2, Plus, BarChart2, DollarSign, AlertCircle, MapPin, Calendar,
-  Image as ImageIcon, FileText, Send, Download, Upload,
+  Image as ImageIcon, FileText, Send, Download, Upload, PenLine,
+  HelpCircle, Building2, Video, Settings,
 } from 'lucide-react';
 import NotificationBell from '@/components/admin/NotificationBell';
+import { CONTENT_SCHEMA } from '@/lib/contentSchema';
 
-type Tab = 'overview' | 'members' | 'messages' | 'news' | 'donations' | 'admins' | 'candidates' | 'events' | 'volunteers' | 'gallery' | 'documents' | 'complaints' | 'polls' | 'petitions' | 'rsvps' | 'newsletter';
+type Tab = 'overview' | 'members' | 'messages' | 'news' | 'donations' | 'admins' | 'candidates' | 'events' | 'volunteers' | 'gallery' | 'documents' | 'complaints' | 'polls' | 'petitions' | 'rsvps' | 'newsletter' | 'content' | 'faq' | 'branches' | 'videos' | 'settings';
 
 interface Member {
   id: string; firstName: string; lastName: string;
@@ -110,7 +115,14 @@ const ROLE_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 export default function AdminDashboard() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (status === 'unauthenticated') router.replace('/admin/login');
+  }, [status, router]);
+
   const userRole = (session?.user as { role?: string })?.role ?? '';
   const isSuperAdmin = userRole === 'SUPER_ADMIN';
 
@@ -423,6 +435,11 @@ export default function AdminDashboard() {
     { id: 'petitions', label: 'Petitions', icon: FileText },
     { id: 'rsvps', label: 'RSVPs', icon: Calendar },
     { id: 'newsletter', label: 'Newsletter', icon: Mail },
+    { id: 'content', label: 'Page Content', icon: PenLine },
+    { id: 'faq', label: 'FAQ Manager', icon: HelpCircle },
+    { id: 'branches', label: 'Branch Offices', icon: Building2 },
+    { id: 'videos', label: 'Videos', icon: Video },
+    { id: 'settings', label: 'Site Settings', icon: Settings },
     { id: 'admins', label: 'Admin Users', icon: UserCog, superOnly: true },
   ];
 
@@ -437,14 +454,9 @@ export default function AdminDashboard() {
             className="fixed lg:relative z-40 top-0 left-0 h-screen w-64 bg-[#0a1128] border-r border-white/8 flex flex-col shrink-0"
           >
             {/* Brand */}
-            <div className="p-5 border-b border-white/8 flex items-center gap-3">
-              <div className="relative w-11 h-11 rounded-full overflow-hidden border-2 border-gold/40 bg-[#1a2454] shrink-0">
-                <Image src="/logo.png" alt="XTS" fill sizes="44px" className="object-contain p-0.5" priority />
-              </div>
-              <div>
-                <div className="text-gold font-black text-sm leading-tight">XTS Admin</div>
-                <div className="text-white/30 text-[11px] mt-0.5">Control Panel</div>
-              </div>
+            <div className="p-5 border-b border-white/8 flex flex-col gap-2">
+              <XTSLogoBolt size="xs" animate={false} darkBg={true} />
+              <div className="text-white/30 text-[10px] uppercase tracking-widest pl-0.5">Admin Control Panel</div>
             </div>
 
             {/* Session badge */}
@@ -2047,6 +2059,21 @@ export default function AdminDashboard() {
               </motion.div>
             )}
 
+            {/* ─── PAGE CONTENT EDITOR ─── */}
+            {tab === 'content' && <ContentEditorTab />}
+
+            {/* ─── FAQ MANAGER ─── */}
+            {tab === 'faq' && <FAQManagerTab />}
+
+            {/* ─── BRANCH OFFICES ─── */}
+            {tab === 'branches' && <BranchManagerTab />}
+
+            {/* ─── VIDEOS MANAGER ─── */}
+            {tab === 'videos' && <VideosManagerTab />}
+
+            {/* ─── SITE SETTINGS ─── */}
+            {tab === 'settings' && <SiteSettingsTab />}
+
             {/* ─── ADMIN USERS ─── */}
             {tab === 'admins' && isSuperAdmin && (
               <motion.div key="admins" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
@@ -2316,4 +2343,841 @@ function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: 
 
 function Spinner() {
   return <div className="w-4 h-4 border-2 border-navy/30 border-t-navy rounded-full animate-spin" />;
+}
+
+// ─── CONTENT EDITOR TAB ─────────────────────────────────────────────────────
+
+interface ContentField {
+  key: string; label: string; multiline: boolean;
+  en: string; so: string; defaultEn: string; defaultSo: string; isCustom: boolean;
+}
+interface ContentPage { page: string; label: string; fields: ContentField[] }
+
+function ContentEditorTab() {
+  const [selectedPage, setSelectedPage] = useState<string>('home');
+  const [pageData, setPageData] = useState<ContentPage | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState<Record<string, boolean>>({});
+  const [saved, setSaved] = useState<Record<string, boolean>>({});
+  const [edits, setEdits] = useState<Record<string, { en: string; so: string }>>({});
+  const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    loadPage(selectedPage);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPage]);
+
+  async function loadPage(page: string) {
+    setLoading(true);
+    setEdits({});
+    setSaved({});
+    try {
+      const r = await fetch(`/api/admin/content?page=${page}`);
+      const data = await r.json();
+      setPageData(data);
+    } catch { /* ignore */ }
+    setLoading(false);
+  }
+
+  function editField(key: string, lang: 'en' | 'so', value: string) {
+    setEdits(prev => ({
+      ...prev,
+      [key]: { ...(prev[key] ?? { en: pageData?.fields.find(f => f.key === key)?.en ?? '', so: pageData?.fields.find(f => f.key === key)?.so ?? '' }), [lang]: value },
+    }));
+  }
+
+  async function saveField(key: string) {
+    const field = pageData?.fields.find(f => f.key === key);
+    const en = edits[key]?.en ?? field?.en ?? '';
+    const so = edits[key]?.so ?? field?.so ?? '';
+    setSaving(prev => ({ ...prev, [key]: true }));
+    try {
+      await Promise.all([
+        fetch('/api/admin/content', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ page: selectedPage, section: key, lang: 'en', content: en }) }),
+        fetch('/api/admin/content', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ page: selectedPage, section: key, lang: 'so', content: so }) }),
+      ]);
+      setSaved(prev => ({ ...prev, [key]: true }));
+      setTimeout(() => setSaved(prev => ({ ...prev, [key]: false })), 2500);
+      await loadPage(selectedPage);
+    } catch { /* ignore */ }
+    setSaving(prev => ({ ...prev, [key]: false }));
+  }
+
+  async function resetField(key: string) {
+    if (!confirm('Reset this field to the default text?')) return;
+    await fetch('/api/admin/content', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ page: selectedPage, section: key }) });
+    setEdits(prev => { const n = { ...prev }; delete n[key]; return n; });
+    await loadPage(selectedPage);
+  }
+
+  const filteredFields = pageData?.fields.filter(f =>
+    !searchTerm || f.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    f.en.toLowerCase().includes(searchTerm.toLowerCase())
+  ) ?? [];
+
+  return (
+    <motion.div key="content" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+      <div className="mb-6">
+        <h2 className="text-white font-bold text-lg">Page Content Editor</h2>
+        <p className="text-white/30 text-xs mt-0.5">Edit any text on the website in English and Somali — changes go live instantly</p>
+      </div>
+
+      <div className="flex gap-4 flex-col lg:flex-row">
+        {/* Page selector sidebar */}
+        <div className="lg:w-56 shrink-0">
+          <div className="bg-white/3 border border-white/8 rounded-2xl overflow-hidden">
+            <div className="px-3 py-2.5 border-b border-white/8">
+              <p className="text-white/40 text-[11px] font-semibold uppercase tracking-wider">Select Page</p>
+            </div>
+            <div className="py-1 max-h-[70vh] overflow-y-auto">
+              {CONTENT_SCHEMA.map(s => (
+                <button key={s.page} onClick={() => setSelectedPage(s.page)}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-sm transition-colors ${selectedPage === s.page ? 'bg-gold/10 text-gold' : 'text-white/50 hover:text-white hover:bg-white/5'}`}>
+                  <span className="text-base">{s.icon}</span>
+                  <span className="font-medium truncate">{s.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Content fields */}
+        <div className="flex-1 min-w-0">
+          {loading ? (
+            <div className="flex items-center justify-center h-40 text-white/30 text-sm gap-3">
+              <div className="w-5 h-5 border-2 border-white/20 border-t-gold rounded-full animate-spin" />
+              Loading content...
+            </div>
+          ) : pageData ? (
+            <div className="space-y-4">
+              {/* Search */}
+              <input
+                type="text"
+                placeholder="Search fields..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/25 focus:outline-none focus:border-gold/40"
+              />
+
+              <div className="text-white/25 text-xs">{filteredFields.length} field{filteredFields.length !== 1 ? 's' : ''} — changes save instantly to the database</div>
+
+              {filteredFields.map(field => {
+                const currentEn = edits[field.key]?.en ?? field.en;
+                const currentSo = edits[field.key]?.so ?? field.so;
+                const isDirty = edits[field.key] !== undefined;
+                const isSavingThis = saving[field.key];
+                const isSavedThis = saved[field.key];
+
+                return (
+                  <div key={field.key} className={`bg-white/3 border rounded-2xl p-4 transition-colors ${field.isCustom ? 'border-gold/25' : 'border-white/8'}`}>
+                    <div className="flex items-center justify-between mb-3 gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-white/70 text-sm font-semibold truncate">{field.label}</span>
+                        {field.isCustom && <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded bg-gold/15 text-gold border border-gold/25 font-bold">CUSTOM</span>}
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {field.isCustom && (
+                          <button onClick={() => resetField(field.key)}
+                            className="text-[11px] text-white/30 hover:text-red-400 transition-colors px-2 py-1 rounded-lg hover:bg-red-400/10">
+                            Reset to default
+                          </button>
+                        )}
+                        <button
+                          onClick={() => saveField(field.key)}
+                          disabled={isSavingThis || (!isDirty && !field.isCustom)}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${isSavedThis ? 'bg-green-500/20 text-green-400 border border-green-500/30' : isDirty ? 'bg-gold text-navy hover:bg-gold/90' : 'bg-white/5 text-white/25 cursor-not-allowed'}`}>
+                          {isSavingThis ? <div className="w-3 h-3 border-2 border-current/30 border-t-current rounded-full animate-spin" /> : isSavedThis ? '✓ Saved' : 'Save'}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {/* English */}
+                      <div>
+                        <label className="block text-[10px] text-white/30 font-semibold uppercase tracking-wider mb-1.5">🇬🇧 English</label>
+                        {field.multiline ? (
+                          <textarea
+                            rows={4}
+                            value={currentEn}
+                            onChange={e => editField(field.key, 'en', e.target.value)}
+                            className="w-full bg-[#0a1128] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-gold/40 resize-none leading-relaxed"
+                          />
+                        ) : (
+                          <input
+                            value={currentEn}
+                            onChange={e => editField(field.key, 'en', e.target.value)}
+                            className="w-full bg-[#0a1128] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-gold/40"
+                          />
+                        )}
+                      </div>
+
+                      {/* Somali */}
+                      <div>
+                        <label className="block text-[10px] text-white/30 font-semibold uppercase tracking-wider mb-1.5">🇸🇴 Somali</label>
+                        {field.multiline ? (
+                          <textarea
+                            rows={4}
+                            value={currentSo}
+                            onChange={e => editField(field.key, 'so', e.target.value)}
+                            className="w-full bg-[#0a1128] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-gold/40 resize-none leading-relaxed"
+                          />
+                        ) : (
+                          <input
+                            value={currentSo}
+                            onChange={e => editField(field.key, 'so', e.target.value)}
+                            className="w-full bg-[#0a1128] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-gold/40"
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// FAQ MANAGER TAB
+// ─────────────────────────────────────────────────────────────
+interface FAQItem { id: string; questionEn: string; questionSo: string; answerEn: string; answerSo: string; category: string; sortOrder: number; active: boolean; }
+
+function FAQManagerTab() {
+  const [faqs, setFaqs] = useState<FAQItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editItem, setEditItem] = useState<FAQItem | null>(null);
+  const [form, setForm] = useState({ questionEn: '', questionSo: '', answerEn: '', answerSo: '', category: 'General', sortOrder: 0, active: true });
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/admin/faq').then(r => r.json()).then(d => { setFaqs(d.faqs ?? d ?? []); setLoading(false); }).catch(() => setLoading(false));
+  }, []);
+
+  const openNew = () => { setEditItem(null); setForm({ questionEn: '', questionSo: '', answerEn: '', answerSo: '', category: 'General', sortOrder: 0, active: true }); setFormOpen(true); };
+  const openEdit = (f: FAQItem) => { setEditItem(f); setForm({ questionEn: f.questionEn, questionSo: f.questionSo, answerEn: f.answerEn, answerSo: f.answerSo, category: f.category, sortOrder: f.sortOrder, active: f.active }); setFormOpen(true); };
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault(); setSaving(true);
+    if (editItem) {
+      const res = await fetch(`/api/admin/faq/${editItem.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
+      if (res.ok) { const updated = await res.json(); setFaqs(f => f.map(x => x.id === updated.id ? updated : x)); }
+    } else {
+      const res = await fetch('/api/admin/faq', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
+      if (res.ok) { const created = await res.json(); setFaqs(f => [created, ...f]); }
+    }
+    setSaving(false); setFormOpen(false);
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm('Delete this FAQ?')) return;
+    await fetch(`/api/admin/faq/${id}`, { method: 'DELETE' });
+    setFaqs(f => f.filter(x => x.id !== id));
+  };
+
+  const toggle = async (item: FAQItem) => {
+    const res = await fetch(`/api/admin/faq/${item.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ active: !item.active }) });
+    if (res.ok) { const updated = await res.json(); setFaqs(f => f.map(x => x.id === updated.id ? updated : x)); }
+  };
+
+  if (loading) return <div className="flex justify-center py-20"><Spinner /></div>;
+
+  return (
+    <motion.div key="faq" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <h2 className="text-white font-bold">FAQ Manager ({faqs.length})</h2>
+          <p className="text-white/30 text-xs mt-0.5">Add, edit, or hide FAQ entries shown on the public FAQ page</p>
+        </div>
+        <button onClick={formOpen ? () => setFormOpen(false) : openNew} className="flex items-center gap-2 px-4 py-2 bg-gold text-navy font-bold rounded-xl text-sm hover:bg-gold/90 transition-colors">
+          <Plus size={15} /> {formOpen ? 'Cancel' : 'Add FAQ'}
+        </button>
+      </div>
+
+      <AnimatePresence>
+        {formOpen && (
+          <motion.form onSubmit={save} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+            className="bg-white/3 border border-white/10 rounded-2xl p-5 mb-5 space-y-4">
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div><label className="text-white/50 text-xs mb-1 block">Question (English)</label><input value={form.questionEn} onChange={e => setForm(f => ({ ...f, questionEn: e.target.value }))} required className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-gold/40" /></div>
+              <div><label className="text-white/50 text-xs mb-1 block">Question (Somali)</label><input value={form.questionSo} onChange={e => setForm(f => ({ ...f, questionSo: e.target.value }))} required className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-gold/40" /></div>
+              <div><label className="text-white/50 text-xs mb-1 block">Answer (English)</label><textarea value={form.answerEn} onChange={e => setForm(f => ({ ...f, answerEn: e.target.value }))} required rows={3} className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-gold/40 resize-none" /></div>
+              <div><label className="text-white/50 text-xs mb-1 block">Answer (Somali)</label><textarea value={form.answerSo} onChange={e => setForm(f => ({ ...f, answerSo: e.target.value }))} required rows={3} className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-gold/40 resize-none" /></div>
+              <div><label className="text-white/50 text-xs mb-1 block">Category</label><input value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-gold/40" /></div>
+              <div><label className="text-white/50 text-xs mb-1 block">Sort Order</label><input type="number" value={form.sortOrder} onChange={e => setForm(f => ({ ...f, sortOrder: +e.target.value }))} className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-gold/40" /></div>
+            </div>
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={form.active} onChange={e => setForm(f => ({ ...f, active: e.target.checked }))} className="w-4 h-4 accent-gold" />
+                <span className="text-white/60 text-sm">Active (visible on site)</span>
+              </label>
+              <button type="submit" disabled={saving} className="ml-auto px-5 py-2 bg-gold text-navy font-bold rounded-xl text-sm hover:bg-gold/90 transition-colors disabled:opacity-50">
+                {saving ? 'Saving…' : editItem ? 'Save Changes' : 'Create FAQ'}
+              </button>
+            </div>
+          </motion.form>
+        )}
+      </AnimatePresence>
+
+      <div className="space-y-2">
+        {faqs.map(item => (
+          <div key={item.id} className="bg-white/3 border border-white/8 rounded-xl px-4 py-3 flex items-start gap-3">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gold/10 text-gold border border-gold/20">{item.category}</span>
+                {!item.active && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">Hidden</span>}
+              </div>
+              <p className="text-white text-sm font-semibold truncate">{item.questionEn}</p>
+              <p className="text-white/35 text-xs truncate">{item.questionSo}</p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button onClick={() => toggle(item)} className={`text-xs px-2 py-1 rounded-lg border transition-colors ${item.active ? 'border-green-500/30 text-green-400 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30' : 'border-white/10 text-white/30 hover:bg-green-500/10 hover:text-green-400 hover:border-green-500/30'}`}>
+                {item.active ? 'Hide' : 'Show'}
+              </button>
+              <button onClick={() => openEdit(item)} className="p-2 rounded-lg text-white/40 hover:text-gold hover:bg-gold/10 transition-colors"><Edit2 size={14} /></button>
+              <button onClick={() => remove(item.id)} className="p-2 rounded-lg text-white/40 hover:text-red-400 hover:bg-red-400/10 transition-colors"><Trash2 size={14} /></button>
+            </div>
+          </div>
+        ))}
+        {faqs.length === 0 && <div className="text-center py-12 text-white/30 text-sm">No FAQs yet. Click "Add FAQ" to create the first one.</div>}
+      </div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// BRANCH MANAGER TAB
+// ─────────────────────────────────────────────────────────────
+interface BranchItem { id: string; nameEn: string; nameSo: string; stateEn: string; stateSo: string; addressEn: string; addressSo: string; phone: string | null; email: string | null; hours: string | null; type: string; published: boolean; }
+
+function BranchManagerTab() {
+  const [branches, setBranches] = useState<BranchItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editItem, setEditItem] = useState<BranchItem | null>(null);
+  const emptyForm = { nameEn: '', nameSo: '', stateEn: '', stateSo: '', addressEn: '', addressSo: '', phone: '', email: '', hours: '', type: 'Branch', published: true };
+  const [form, setForm] = useState(emptyForm);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/admin/branches').then(r => r.json()).then(d => { setBranches(d.branches ?? d ?? []); setLoading(false); }).catch(() => setLoading(false));
+  }, []);
+
+  const openNew = () => { setEditItem(null); setForm(emptyForm); setFormOpen(true); };
+  const openEdit = (b: BranchItem) => { setEditItem(b); setForm({ nameEn: b.nameEn, nameSo: b.nameSo, stateEn: b.stateEn, stateSo: b.stateSo, addressEn: b.addressEn, addressSo: b.addressSo, phone: b.phone ?? '', email: b.email ?? '', hours: b.hours ?? '', type: b.type, published: b.published }); setFormOpen(true); };
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault(); setSaving(true);
+    const payload = { ...form, phone: form.phone || null, email: form.email || null, hours: form.hours || null };
+    if (editItem) {
+      const res = await fetch(`/api/admin/branches/${editItem.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      if (res.ok) { const updated = await res.json(); setBranches(b => b.map(x => x.id === updated.id ? updated : x)); }
+    } else {
+      const res = await fetch('/api/admin/branches', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      if (res.ok) { const created = await res.json(); setBranches(b => [...b, created]); }
+    }
+    setSaving(false); setFormOpen(false);
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm('Delete this branch?')) return;
+    await fetch(`/api/admin/branches/${id}`, { method: 'DELETE' });
+    setBranches(b => b.filter(x => x.id !== id));
+  };
+
+  const toggle = async (item: BranchItem) => {
+    const res = await fetch(`/api/admin/branches/${item.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ published: !item.published }) });
+    if (res.ok) { const updated = await res.json(); setBranches(b => b.map(x => x.id === updated.id ? updated : x)); }
+  };
+
+  if (loading) return <div className="flex justify-center py-20"><Spinner /></div>;
+
+  return (
+    <motion.div key="branches" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <h2 className="text-white font-bold">Branch Offices ({branches.length})</h2>
+          <p className="text-white/30 text-xs mt-0.5">Manage XTS offices shown on the Branches page</p>
+        </div>
+        <button onClick={formOpen ? () => setFormOpen(false) : openNew} className="flex items-center gap-2 px-4 py-2 bg-gold text-navy font-bold rounded-xl text-sm hover:bg-gold/90 transition-colors">
+          <Plus size={15} /> {formOpen ? 'Cancel' : 'Add Branch'}
+        </button>
+      </div>
+
+      <AnimatePresence>
+        {formOpen && (
+          <motion.form onSubmit={save} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+            className="bg-white/3 border border-white/10 rounded-2xl p-5 mb-5 space-y-4">
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div><label className="text-white/50 text-xs mb-1 block">Office Name (English)</label><input value={form.nameEn} onChange={e => setForm(f => ({ ...f, nameEn: e.target.value }))} required className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-gold/40" /></div>
+              <div><label className="text-white/50 text-xs mb-1 block">Office Name (Somali)</label><input value={form.nameSo} onChange={e => setForm(f => ({ ...f, nameSo: e.target.value }))} required className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-gold/40" /></div>
+              <div><label className="text-white/50 text-xs mb-1 block">State (English)</label><input value={form.stateEn} onChange={e => setForm(f => ({ ...f, stateEn: e.target.value }))} required className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-gold/40" /></div>
+              <div><label className="text-white/50 text-xs mb-1 block">State (Somali)</label><input value={form.stateSo} onChange={e => setForm(f => ({ ...f, stateSo: e.target.value }))} required className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-gold/40" /></div>
+              <div><label className="text-white/50 text-xs mb-1 block">Address (English)</label><input value={form.addressEn} onChange={e => setForm(f => ({ ...f, addressEn: e.target.value }))} required className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-gold/40" /></div>
+              <div><label className="text-white/50 text-xs mb-1 block">Address (Somali)</label><input value={form.addressSo} onChange={e => setForm(f => ({ ...f, addressSo: e.target.value }))} required className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-gold/40" /></div>
+              <div><label className="text-white/50 text-xs mb-1 block">Phone (optional)</label><input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-gold/40" /></div>
+              <div><label className="text-white/50 text-xs mb-1 block">Email (optional)</label><input value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-gold/40" /></div>
+              <div><label className="text-white/50 text-xs mb-1 block">Hours (optional)</label><input value={form.hours} onChange={e => setForm(f => ({ ...f, hours: e.target.value }))} placeholder="e.g. Mon–Fri 8am–5pm" className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-gold/40" /></div>
+              <div><label className="text-white/50 text-xs mb-1 block">Type</label>
+                <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-gold/40">
+                  <option value="HQ">HQ</option><option value="Branch">Branch</option><option value="Liaison">Liaison</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={form.published} onChange={e => setForm(f => ({ ...f, published: e.target.checked }))} className="w-4 h-4 accent-gold" />
+                <span className="text-white/60 text-sm">Published (visible on site)</span>
+              </label>
+              <button type="submit" disabled={saving} className="ml-auto px-5 py-2 bg-gold text-navy font-bold rounded-xl text-sm hover:bg-gold/90 transition-colors disabled:opacity-50">
+                {saving ? 'Saving…' : editItem ? 'Save Changes' : 'Create Branch'}
+              </button>
+            </div>
+          </motion.form>
+        )}
+      </AnimatePresence>
+
+      <div className="space-y-2">
+        {branches.map(item => (
+          <div key={item.id} className="bg-white/3 border border-white/8 rounded-xl px-4 py-3 flex items-start gap-3">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gold/10 text-gold border border-gold/20">{item.type}</span>
+                {!item.published && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">Hidden</span>}
+              </div>
+              <p className="text-white text-sm font-semibold">{item.nameEn}</p>
+              <p className="text-white/35 text-xs">{item.stateEn} · {item.email ?? item.phone ?? ''}</p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button onClick={() => toggle(item)} className={`text-xs px-2 py-1 rounded-lg border transition-colors ${item.published ? 'border-green-500/30 text-green-400 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30' : 'border-white/10 text-white/30 hover:bg-green-500/10 hover:text-green-400 hover:border-green-500/30'}`}>
+                {item.published ? 'Hide' : 'Show'}
+              </button>
+              <button onClick={() => openEdit(item)} className="p-2 rounded-lg text-white/40 hover:text-gold hover:bg-gold/10 transition-colors"><Edit2 size={14} /></button>
+              <button onClick={() => remove(item.id)} className="p-2 rounded-lg text-white/40 hover:text-red-400 hover:bg-red-400/10 transition-colors"><Trash2 size={14} /></button>
+            </div>
+          </div>
+        ))}
+        {branches.length === 0 && <div className="text-center py-12 text-white/30 text-sm">No branches yet. Click "Add Branch" to create the first one.</div>}
+      </div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// VIDEOS MANAGER TAB
+// ─────────────────────────────────────────────────────────────
+interface VideoItem { id: string; titleEn: string; titleSo: string; descEn: string | null; descSo: string | null; videoId: string; videoUrl: string | null; featured: boolean; date: string | null; sortOrder: number; published: boolean; }
+
+// Extract YouTube video ID from any YouTube URL format or bare ID
+function parseYouTubeId(input: string): string {
+  const s = input.trim();
+  // Full URL: youtube.com/watch?v=ID or youtu.be/ID or youtube.com/embed/ID
+  const match = s.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  if (match) return match[1];
+  // Bare 11-char ID
+  if (/^[A-Za-z0-9_-]{11}$/.test(s)) return s;
+  return s; // return as-is, API will validate
+}
+
+function VideosManagerTab() {
+  const [videos, setVideos] = useState<VideoItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editItem, setEditItem] = useState<VideoItem | null>(null);
+  // videoType: 'youtube' | 'local'
+  const [videoType, setVideoType] = useState<'youtube' | 'local'>('youtube');
+  const emptyForm = { titleEn: '', titleSo: '', descEn: '', descSo: '', videoId: '', date: '', sortOrder: 0, published: true, featured: false };
+  const [form, setForm] = useState(emptyForm);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
+  const [previewId, setPreviewId] = useState('');
+  // Local file upload state
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadedUrl, setUploadedUrl] = useState('');
+
+  useEffect(() => {
+    fetch('/api/admin/videos')
+      .then(r => r.json())
+      .then(d => { setVideos(Array.isArray(d) ? d : []); setLoading(false); })
+      .catch(() => { setLoading(false); });
+  }, []);
+
+  const openNew = () => {
+    setEditItem(null); setForm(emptyForm); setSaveError(''); setPreviewId('');
+    setVideoType('youtube'); setUploadFile(null); setUploadProgress(0); setUploadedUrl('');
+    setFormOpen(true);
+  };
+  const openEdit = (v: VideoItem) => {
+    setEditItem(v);
+    setForm({ titleEn: v.titleEn, titleSo: v.titleSo, descEn: v.descEn ?? '', descSo: v.descSo ?? '', videoId: v.videoId, date: v.date ?? '', sortOrder: v.sortOrder, published: v.published, featured: v.featured });
+    setPreviewId(v.videoId);
+    setSaveError('');
+    setVideoType(v.videoUrl ? 'local' : 'youtube');
+    setUploadedUrl(v.videoUrl ?? '');
+    setUploadFile(null);
+    setFormOpen(true);
+  };
+
+  const handleVideoIdChange = (raw: string) => {
+    const id = parseYouTubeId(raw);
+    setForm(f => ({ ...f, videoId: id }));
+    if (/^[A-Za-z0-9_-]{11}$/.test(id)) setPreviewId(id);
+    else setPreviewId('');
+  };
+
+  const handleFileChange = async (file: File | null) => {
+    if (!file) return;
+    setUploadFile(file);
+    setUploadProgress(10);
+    setSaveError('');
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      setUploadProgress(30);
+      const res = await fetch('/api/admin/upload-video', { method: 'POST', body: fd });
+      setUploadProgress(80);
+      const json = await res.json();
+      if (!res.ok) { setSaveError(json.error ?? 'Upload failed'); setUploadProgress(0); return; }
+      setUploadedUrl(json.url);
+      setUploadProgress(100);
+    } catch {
+      setSaveError('Upload failed — check server is running.');
+      setUploadProgress(0);
+    }
+  };
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaveError('');
+    if (!form.titleEn.trim()) { setSaveError('English title is required.'); return; }
+    if (!form.titleSo.trim()) { setSaveError('Somali title is required.'); return; }
+    if (videoType === 'youtube' && !form.videoId.trim()) { setSaveError('YouTube Video ID or URL is required.'); return; }
+    if (videoType === 'local' && !uploadedUrl && !editItem?.videoUrl) { setSaveError('Please upload a video file first.'); return; }
+    setSaving(true);
+    try {
+      const payload = {
+        ...form,
+        descEn: form.descEn || null,
+        descSo: form.descSo || null,
+        date: form.date || null,
+        videoId: videoType === 'local' ? '' : form.videoId,
+        videoUrl: videoType === 'local' ? (uploadedUrl || editItem?.videoUrl || null) : null,
+      };
+      const url    = editItem ? `/api/admin/videos/${editItem.id}` : '/api/admin/videos';
+      const method = editItem ? 'PATCH' : 'POST';
+      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const json = await res.json();
+      if (!res.ok) { setSaveError(json.error ?? 'Something went wrong. Please try again.'); setSaving(false); return; }
+      if (editItem) setVideos(v => v.map(x => x.id === json.id ? json : x));
+      else          setVideos(v => [json, ...v]);
+      setFormOpen(false);
+    } catch {
+      setSaveError('Network error — make sure the server is running.');
+    }
+    setSaving(false);
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm('Delete this video?')) return;
+    const res = await fetch(`/api/admin/videos/${id}`, { method: 'DELETE' });
+    if (res.ok) setVideos(v => v.filter(x => x.id !== id));
+    else alert('Delete failed — please try again.');
+  };
+
+  const toggle = async (item: VideoItem) => {
+    const res = await fetch(`/api/admin/videos/${item.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ published: !item.published }) });
+    if (res.ok) { const updated = await res.json(); setVideos(v => v.map(x => x.id === updated.id ? updated : x)); }
+  };
+
+  const toggleFeatured = async (item: VideoItem) => {
+    // Un-feature all others first (only one featured at a time)
+    const wasFeatured = item.featured;
+    const res = await fetch(`/api/admin/videos/${item.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ featured: !wasFeatured }) });
+    if (res.ok) {
+      const updated = await res.json();
+      setVideos(v => v.map(x => x.id === updated.id ? updated : { ...x, featured: false }));
+    }
+  };
+
+  if (loading) return <div className="flex justify-center py-20"><Spinner /></div>;
+
+  return (
+    <motion.div key="videos" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <h2 className="text-white font-bold">Videos ({videos.length})</h2>
+          <p className="text-white/30 text-xs mt-0.5">Upload local videos or add YouTube links — mark one as ★ Featured to show on the homepage</p>
+        </div>
+        <button onClick={formOpen ? () => setFormOpen(false) : openNew}
+          className="flex items-center gap-2 px-4 py-2 bg-gold text-navy font-bold rounded-xl text-sm hover:bg-gold/90 transition-colors">
+          <Plus size={15} /> {formOpen ? 'Cancel' : 'Add Video'}
+        </button>
+      </div>
+
+      <AnimatePresence>
+        {formOpen && (
+          <motion.form onSubmit={save} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+            className="bg-white/3 border border-white/10 rounded-2xl p-5 mb-5 space-y-4 overflow-hidden">
+
+            {/* Error banner */}
+            {saveError && (
+              <div className="bg-red-500/15 border border-red-500/30 rounded-xl px-4 py-3 text-red-400 text-sm flex items-center gap-2">
+                <XCircle size={15} className="shrink-0" /> {saveError}
+              </div>
+            )}
+
+            {/* Video type toggle */}
+            <div>
+              <label className="text-white/50 text-xs mb-2 block">Video Source</label>
+              <div className="flex gap-2">
+                <button type="button" onClick={() => setVideoType('local')}
+                  className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition-all ${videoType === 'local' ? 'bg-gold text-navy border-gold' : 'border-white/10 text-white/40 hover:border-gold/30'}`}>
+                  📁 Upload from Device
+                </button>
+                <button type="button" onClick={() => setVideoType('youtube')}
+                  className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition-all ${videoType === 'youtube' ? 'bg-red-600 text-white border-red-600' : 'border-white/10 text-white/40 hover:border-red-600/30'}`}>
+                  ▶ YouTube Link
+                </button>
+              </div>
+            </div>
+
+            {/* Local file upload */}
+            {videoType === 'local' && (
+              <div>
+                <label className="text-white/50 text-xs mb-1 block">Video File (MP4, WebM, MOV — max 500MB)</label>
+                <div
+                  className="border-2 border-dashed border-white/15 rounded-xl p-6 text-center hover:border-gold/30 transition-colors cursor-pointer"
+                  onClick={() => document.getElementById('video-file-input')?.click()}
+                  onDragOver={e => e.preventDefault()}
+                  onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFileChange(f); }}
+                >
+                  <input id="video-file-input" type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime,video/x-msvideo" className="hidden"
+                    onChange={e => handleFileChange(e.target.files?.[0] ?? null)} />
+                  {uploadedUrl ? (
+                    <div className="space-y-2">
+                      <div className="text-green-400 font-bold text-sm">✓ Video uploaded successfully</div>
+                      <video src={uploadedUrl} controls className="w-full rounded-lg max-h-48 bg-black" />
+                      <button type="button" onClick={e => { e.stopPropagation(); setUploadedUrl(''); setUploadFile(null); setUploadProgress(0); }}
+                        className="text-xs text-white/30 hover:text-red-400 transition-colors">Remove & re-upload</button>
+                    </div>
+                  ) : uploadFile && uploadProgress > 0 && uploadProgress < 100 ? (
+                    <div className="space-y-3">
+                      <div className="text-white/50 text-sm">Uploading {uploadFile.name}…</div>
+                      <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                        <div className="h-full bg-gold rounded-full transition-all" style={{ width: `${uploadProgress}%` }} />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="text-4xl">🎬</div>
+                      <div className="text-white/50 text-sm">Click or drag &amp; drop your video here</div>
+                      <div className="text-white/25 text-xs">Supports MP4, MOV, WebM · Max 500MB</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* YouTube URL */}
+            {videoType === 'youtube' && (
+              <div>
+                <label className="text-white/50 text-xs mb-1 block">YouTube Video URL or ID <span className="text-gold">*</span></label>
+                <input
+                  value={form.videoId}
+                  onChange={e => handleVideoIdChange(e.target.value)}
+                  placeholder="https://www.youtube.com/watch?v=... or paste just the ID"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:border-gold/40"
+                />
+                {previewId && (
+                  <div className="mt-2 rounded-xl overflow-hidden border border-white/10" style={{ aspectRatio: '16/9' }}>
+                    <iframe src={`https://www.youtube.com/embed/${previewId}`} className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen title="Preview" />
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-white/50 text-xs mb-1 block">Title (English) <span className="text-gold">*</span></label>
+                <input value={form.titleEn} onChange={e => setForm(f => ({ ...f, titleEn: e.target.value }))}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-gold/40" />
+              </div>
+              <div>
+                <label className="text-white/50 text-xs mb-1 block">Title (Somali) <span className="text-gold">*</span></label>
+                <input value={form.titleSo} onChange={e => setForm(f => ({ ...f, titleSo: e.target.value }))}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-gold/40" />
+              </div>
+              <div>
+                <label className="text-white/50 text-xs mb-1 block">Description (English)</label>
+                <textarea value={form.descEn} onChange={e => setForm(f => ({ ...f, descEn: e.target.value }))} rows={2}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-gold/40 resize-none" />
+              </div>
+              <div>
+                <label className="text-white/50 text-xs mb-1 block">Description (Somali)</label>
+                <textarea value={form.descSo} onChange={e => setForm(f => ({ ...f, descSo: e.target.value }))} rows={2}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-gold/40 resize-none" />
+              </div>
+              <div>
+                <label className="text-white/50 text-xs mb-1 block">Date (optional)</label>
+                <input value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} placeholder="e.g. 2025"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-gold/40" />
+              </div>
+              <div>
+                <label className="text-white/50 text-xs mb-1 block">Sort Order</label>
+                <input type="number" value={form.sortOrder} onChange={e => setForm(f => ({ ...f, sortOrder: +e.target.value }))}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-gold/40" />
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-4 pt-1">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={form.published} onChange={e => setForm(f => ({ ...f, published: e.target.checked }))} className="w-4 h-4 accent-gold" />
+                <span className="text-white/60 text-sm">Published</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={form.featured} onChange={e => setForm(f => ({ ...f, featured: e.target.checked }))} className="w-4 h-4 accent-gold" />
+                <span className="text-white/60 text-sm">⭐ Featured on Homepage</span>
+              </label>
+              <button type="submit" disabled={saving}
+                className="ml-auto flex items-center gap-2 px-6 py-2.5 bg-gold text-navy font-bold rounded-xl text-sm hover:bg-gold/90 transition-colors disabled:opacity-50">
+                {saving ? <><Spinner /><span>Saving…</span></> : editItem ? 'Save Changes' : '+ Add Video'}
+              </button>
+            </div>
+          </motion.form>
+        )}
+      </AnimatePresence>
+
+      <div className="grid sm:grid-cols-2 gap-3">
+        {videos.map(item => (
+          <div key={item.id} className={`bg-white/3 border rounded-xl overflow-hidden transition-all ${item.featured ? 'border-gold/40' : 'border-white/8'}`}>
+            <div className="aspect-video bg-black/40 flex items-center justify-center relative">
+              {item.videoUrl ? (
+                <video src={item.videoUrl} className="w-full h-full object-cover" preload="none" />
+              ) : (
+                <img src={`https://img.youtube.com/vi/${item.videoId}/mqdefault.jpg`} alt={item.titleEn}
+                  className="w-full h-full object-cover"
+                  onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+              )}
+              <div className="absolute top-2 left-2 flex gap-1.5">
+                {item.featured && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gold/90 text-navy">★ Featured</span>}
+                {item.videoUrl && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/80 text-white">Local</span>}
+              </div>
+              {!item.published && (
+                <div className="absolute top-2 right-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/80 text-white">Hidden</div>
+              )}
+            </div>
+            <div className="p-3">
+              <p className="text-white text-sm font-semibold truncate">{item.titleEn}</p>
+              <p className="text-white/35 text-xs truncate">{item.titleSo}</p>
+              {item.videoUrl
+                ? <p className="text-white/20 text-[10px] mt-1 font-mono truncate">{item.videoUrl}</p>
+                : <p className="text-white/20 text-[10px] mt-1 font-mono truncate">YT: {item.videoId}</p>
+              }
+              <div className="flex items-center gap-2 mt-3">
+                <button onClick={() => toggleFeatured(item)} title="Toggle featured on homepage"
+                  className={`text-xs px-2 py-1 rounded-lg border transition-colors ${item.featured ? 'border-gold/40 text-gold hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30' : 'border-white/10 text-white/30 hover:bg-gold/10 hover:text-gold hover:border-gold/30'}`}>
+                  {item.featured ? '★ Unfeature' : '☆ Feature'}
+                </button>
+                <button onClick={() => toggle(item)}
+                  className={`text-xs px-2 py-1 rounded-lg border transition-colors ${item.published ? 'border-green-500/30 text-green-400 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30' : 'border-white/10 text-white/30 hover:bg-green-500/10 hover:text-green-400 hover:border-green-500/30'}`}>
+                  {item.published ? 'Hide' : 'Show'}
+                </button>
+                <button onClick={() => openEdit(item)} className="p-1.5 rounded-lg text-white/40 hover:text-gold hover:bg-gold/10 transition-colors"><Edit2 size={13} /></button>
+                <button onClick={() => remove(item.id)} className="p-1.5 rounded-lg text-white/40 hover:text-red-400 hover:bg-red-400/10 transition-colors"><Trash2 size={13} /></button>
+              </div>
+            </div>
+          </div>
+        ))}
+        {videos.length === 0 && (
+          <div className="col-span-2 text-center py-16 text-white/30 text-sm">
+            <Video size={36} className="mx-auto mb-3 opacity-20" />
+            <p>No videos yet. Click <strong className="text-white/50">Add Video</strong> to add the first one.</p>
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// SITE SETTINGS TAB
+// ─────────────────────────────────────────────────────────────
+const SITE_SETTING_FIELDS = [
+  { key: 'phone', label: 'Phone Number', placeholder: '+252 61 xxx xxxx', group: 'Contact' },
+  { key: 'email', label: 'Email Address', placeholder: 'info@xts.so', group: 'Contact' },
+  { key: 'whatsapp', label: 'WhatsApp Number', placeholder: '+252 61 xxx xxxx', group: 'Contact' },
+  { key: 'address', label: 'Main Office Address', placeholder: 'Hodan District, Mogadishu', group: 'Contact' },
+  { key: 'youtube', label: 'YouTube Channel URL', placeholder: 'https://www.youtube.com/@XTSParty', group: 'Social Media' },
+  { key: 'facebook', label: 'Facebook URL', placeholder: 'https://facebook.com/XTSParty', group: 'Social Media' },
+  { key: 'twitter', label: 'Twitter/X URL', placeholder: 'https://twitter.com/XTSParty', group: 'Social Media' },
+  { key: 'telegram', label: 'Telegram URL', placeholder: 'https://t.me/XTSParty', group: 'Social Media' },
+  { key: 'instagram', label: 'Instagram URL', placeholder: 'https://instagram.com/XTSParty', group: 'Social Media' },
+  { key: 'donation_goal', label: 'Donation Campaign Goal (USD)', placeholder: '10000', group: 'Branding' },
+  { key: 'site_name_en', label: 'Site Name (English)', placeholder: "People's Progress Party", group: 'Branding' },
+  { key: 'site_name_so', label: 'Site Name (Somali)', placeholder: 'Xisbiga Tallaabada Shacabka', group: 'Branding' },
+  { key: 'tagline_en', label: 'Tagline (English)', placeholder: 'Justice. Unity. Prosperity.', group: 'Branding' },
+  { key: 'tagline_so', label: 'Tagline (Somali)', placeholder: 'Xaq. Midnimo. Barwaaqo.', group: 'Branding' },
+];
+
+function SiteSettingsTab() {
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState<string | null>(null);
+  const [saved, setSaved] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch('/api/admin/settings').then(r => r.json()).then(d => { setValues(d.settings ?? d ?? {}); setLoading(false); }).catch(() => setLoading(false));
+  }, []);
+
+  const save = async (key: string) => {
+    setSaving(key);
+    await fetch('/api/admin/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key, value: values[key] ?? '' }) });
+    setSaving(null); setSaved(key);
+    setTimeout(() => setSaved(null), 2000);
+  };
+
+  const groups = Array.from(new Set(SITE_SETTING_FIELDS.map(f => f.group)));
+
+  if (loading) return <div className="flex justify-center py-20"><Spinner /></div>;
+
+  return (
+    <motion.div key="settings" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+      <div className="mb-5">
+        <h2 className="text-white font-bold">Site Settings</h2>
+        <p className="text-white/30 text-xs mt-0.5">Configure contact details, social links, and site branding</p>
+      </div>
+      <div className="space-y-6">
+        {groups.map(group => (
+          <div key={group}>
+            <h3 className="text-gold text-xs font-black uppercase tracking-widest mb-3">{group}</h3>
+            <div className="space-y-3">
+              {SITE_SETTING_FIELDS.filter(f => f.group === group).map(field => (
+                <div key={field.key} className="bg-white/3 border border-white/8 rounded-xl p-4">
+                  <label className="text-white/50 text-xs mb-2 block">{field.label}</label>
+                  <div className="flex gap-3">
+                    <input
+                      value={values[field.key] ?? ''}
+                      onChange={e => setValues(v => ({ ...v, [field.key]: e.target.value }))}
+                      placeholder={field.placeholder}
+                      className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-gold/40 placeholder-white/20"
+                    />
+                    <button onClick={() => save(field.key)} disabled={saving === field.key}
+                      className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors shrink-0 ${saved === field.key ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-gold text-navy hover:bg-gold/90'} disabled:opacity-50`}>
+                      {saved === field.key ? '✓ Saved' : saving === field.key ? '…' : 'Save'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  );
 }

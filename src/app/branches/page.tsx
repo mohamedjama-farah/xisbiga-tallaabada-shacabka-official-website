@@ -1,81 +1,44 @@
 'use client';
+import { useState, useEffect } from 'react';
 import { MapPin, Phone, Mail, Clock, Building2 } from 'lucide-react';
 import { useLang } from '@/hooks/useLang';
 
-const branches = [
-  {
-    region: { en: 'Mogadishu (HQ)', so: 'Muqdisho (Xarunta Dhexe)' },
-    address: { en: 'Hodan District, Mogadishu, Banadir', so: 'Degmada Hodan, Muqdisho, Banaadir' },
-    phone: '+252 61 xxx xxxx',
-    email: 'hq@xts.so',
-    hours: { en: 'Mon–Fri 8am–5pm', so: 'Isn–Jimc 8am–5pm' },
-    type: 'HQ',
-    state: { en: 'Banadir', so: 'Banaadir' },
-    coordinates: { top: '63%', left: '55%' },
-  },
-  {
-    region: { en: 'Kismayo', so: 'Kismaayo' },
-    address: { en: 'Hosinow District, Kismayo, Jubaland', so: 'Degmada Hosinow, Kismaayo, Jubaland' },
-    phone: '+252 62 xxx xxxx',
-    email: 'kismayo@xts.so',
-    hours: { en: 'Mon–Fri 8am–4pm', so: 'Isn–Jimc 8am–4pm' },
-    type: 'Branch',
-    state: { en: 'Jubaland', so: 'Jubaland' },
-    coordinates: { top: '75%', left: '48%' },
-  },
-  {
-    region: { en: 'Baidoa', so: 'Baydhabo' },
-    address: { en: 'Central District, Baidoa, South West State', so: 'Degmada Dhexe, Baydhabo, Koonfurta Galbeed' },
-    phone: '+252 46 xxx xxxx',
-    email: 'baidoa@xts.so',
-    hours: { en: 'Mon–Fri 8am–4pm', so: 'Isn–Jimc 8am–4pm' },
-    type: 'Branch',
-    state: { en: 'South West State', so: 'Koonfurta Galbeed' },
-    coordinates: { top: '68%', left: '38%' },
-  },
-  {
-    region: { en: 'Garowe', so: 'Garoowe' },
-    address: { en: 'Nugaal Valley, Garowe, Puntland', so: 'Dooxada Nugaal, Garoowe, Puntland' },
-    phone: '+252 5 xxx xxxx',
-    email: 'garowe@xts.so',
-    hours: { en: 'Mon–Fri 8am–4pm', so: 'Isn–Jimc 8am–4pm' },
-    type: 'Branch',
-    state: { en: 'Puntland', so: 'Puntland' },
-    coordinates: { top: '35%', left: '68%' },
-  },
-  {
-    region: { en: 'Dhusamareb', so: 'Dhuusamarreeb' },
-    address: { en: 'Dhusamareb, Galmudug State', so: 'Dhuusamarreeb, Gobolka Galmudug' },
-    phone: '+252 6 xxx xxxx',
-    email: 'galmudug@xts.so',
-    hours: { en: 'Mon–Fri 8am–4pm', so: 'Isn–Jimc 8am–4pm' },
-    type: 'Branch',
-    state: { en: 'Galmudug', so: 'Galmudug' },
-    coordinates: { top: '50%', left: '58%' },
-  },
-  {
-    region: { en: 'Beledweyne', so: 'Beledweyne' },
-    address: { en: 'Beledweyne, Hirshabelle State', so: 'Beledweyne, Gobolka Hirshabelle' },
-    phone: '+252 6 xxx xxxx',
-    email: 'hirshabelle@xts.so',
-    hours: { en: 'Mon–Fri 8am–4pm', so: 'Isn–Jimc 8am–4pm' },
-    type: 'Branch',
-    state: { en: 'Hirshabelle', so: 'Hirshabelle' },
-    coordinates: { top: '55%', left: '50%' },
-  },
-  {
-    region: { en: 'Hargeisa (Liaison)', so: 'Hargeysa (Xiriir)' },
-    address: { en: 'Hargeisa', so: 'Hargeysa' },
-    phone: '+252 2 xxx xxxx',
-    email: 'hargeisa@xts.so',
-    hours: { en: 'Mon–Fri 9am–4pm', so: 'Isn–Jimc 9am–4pm' },
-    type: 'Liaison',
-    state: { en: 'Northwest', so: 'Waqooyi Galbeed' },
-    coordinates: { top: '22%', left: '28%' },
-  },
+interface BranchItem {
+  id: string;
+  nameEn: string;
+  nameSo: string;
+  stateEn: string;
+  stateSo: string;
+  addressEn: string;
+  addressSo: string;
+  phone?: string;
+  email?: string;
+  hours?: string;
+  type: string;
+  published: boolean;
+}
+
+const FALLBACK_BRANCHES: BranchItem[] = [
+  { id: 'b1', nameEn: 'Mogadishu (HQ)', nameSo: 'Muqdisho (Xarunta Dhexe)', stateEn: 'Banadir', stateSo: 'Banaadir', addressEn: 'Hodan District, Mogadishu, Banadir', addressSo: 'Degmada Hodan, Muqdisho, Banaadir', phone: '+252 61 xxx xxxx', email: 'hq@xts.so', hours: 'Mon–Fri 8am–5pm', type: 'HQ', published: true },
+  { id: 'b2', nameEn: 'Kismayo', nameSo: 'Kismaayo', stateEn: 'Jubaland', stateSo: 'Jubaland', addressEn: 'Hosinow District, Kismayo, Jubaland', addressSo: 'Degmada Hosinow, Kismaayo, Jubaland', phone: '+252 62 xxx xxxx', email: 'kismayo@xts.so', hours: 'Mon–Fri 8am–4pm', type: 'Branch', published: true },
+  { id: 'b3', nameEn: 'Baidoa', nameSo: 'Baydhabo', stateEn: 'South West State', stateSo: 'Koonfurta Galbeed', addressEn: 'Central District, Baidoa, South West State', addressSo: 'Degmada Dhexe, Baydhabo, Koonfurta Galbeed', phone: '+252 46 xxx xxxx', email: 'baidoa@xts.so', hours: 'Mon–Fri 8am–4pm', type: 'Branch', published: true },
+  { id: 'b4', nameEn: 'Garowe', nameSo: 'Garoowe', stateEn: 'Puntland', stateSo: 'Puntland', addressEn: 'Nugaal Valley, Garowe, Puntland', addressSo: 'Dooxada Nugaal, Garoowe, Puntland', phone: '+252 5 xxx xxxx', email: 'garowe@xts.so', hours: 'Mon–Fri 8am–4pm', type: 'Branch', published: true },
+  { id: 'b5', nameEn: 'Dhusamareb', nameSo: 'Dhuusamarreeb', stateEn: 'Galmudug', stateSo: 'Galmudug', addressEn: 'Dhusamareb, Galmudug State', addressSo: 'Dhuusamarreeb, Gobolka Galmudug', phone: '+252 6 xxx xxxx', email: 'galmudug@xts.so', hours: 'Mon–Fri 8am–4pm', type: 'Branch', published: true },
+  { id: 'b6', nameEn: 'Beledweyne', nameSo: 'Beledweyne', stateEn: 'Hirshabelle', stateSo: 'Hirshabelle', addressEn: 'Beledweyne, Hirshabelle State', addressSo: 'Beledweyne, Gobolka Hirshabelle', phone: '+252 6 xxx xxxx', email: 'hirshabelle@xts.so', hours: 'Mon–Fri 8am–4pm', type: 'Branch', published: true },
+  { id: 'b7', nameEn: 'Hargeisa (Liaison)', nameSo: 'Hargeysa (Xiriir)', stateEn: 'Northwest', stateSo: 'Waqooyi Galbeed', addressEn: 'Hargeisa', addressSo: 'Hargeysa', phone: '+252 2 xxx xxxx', email: 'hargeisa@xts.so', hours: 'Mon–Fri 9am–4pm', type: 'Liaison', published: true },
 ];
 
-const stateColors: Record<string, string> = {
+const PIN_POSITIONS: Record<string, { top: string; left: string }> = {
+  'b1': { top: '63%', left: '55%' },
+  'b2': { top: '75%', left: '48%' },
+  'b3': { top: '68%', left: '38%' },
+  'b4': { top: '35%', left: '68%' },
+  'b5': { top: '50%', left: '58%' },
+  'b6': { top: '55%', left: '50%' },
+  'b7': { top: '22%', left: '28%' },
+};
+
+const typeColors: Record<string, string> = {
   HQ: 'bg-gold border-gold/50 text-navy',
   Branch: 'bg-blue-500/20 border-blue-500/40 text-blue-300',
   Liaison: 'bg-purple-500/20 border-purple-500/40 text-purple-300',
@@ -83,6 +46,14 @@ const stateColors: Record<string, string> = {
 
 export default function BranchesPage() {
   const { lang } = useLang();
+  const [branches, setBranches] = useState<BranchItem[]>(FALLBACK_BRANCHES);
+
+  useEffect(() => {
+    fetch('/api/branches')
+      .then(r => r.json())
+      .then((data: BranchItem[]) => { if (data.length > 0) setBranches(data); })
+      .catch(() => {});
+  }, []);
 
   return (
     <main className="min-h-screen bg-navy pt-28 pb-20">
@@ -93,7 +64,7 @@ export default function BranchesPage() {
           <div className="inline-flex items-center gap-2 bg-gold/10 border border-gold/20 rounded-full px-4 py-1.5 mb-4">
             <Building2 size={14} className="text-gold" />
             <span className="text-gold text-xs font-semibold uppercase tracking-wider">
-              {lang === 'en' ? 'Branch Offices' : 'Xafiisyada Laanta' }
+              {lang === 'en' ? 'Branch Offices' : 'Xafiisyada Laanta'}
             </span>
           </div>
           <h1 className="text-4xl font-black text-white mb-3">
@@ -102,7 +73,7 @@ export default function BranchesPage() {
           <p className="text-white/50 text-sm">
             {lang === 'en'
               ? 'XTS has offices across Somalia. Walk in, ask questions, register as a member, or report an issue.'
-              : 'XTS waxay leedahay xafiisyo ka dhex jira Soomaaliya. Soo gal, su\'aalo weydii, isdiiwaangeli xubin ahaan, ama soo gudbi arrin.'}
+              : "XTS waxay leedahay xafiisyo ka dhex jira Soomaaliya. Soo gal, su'aalo weydii, isdiiwaangeli xubin ahaan, ama soo gudbi arrin."}
           </p>
         </div>
 
@@ -112,15 +83,11 @@ export default function BranchesPage() {
             <h2 className="text-white font-bold text-sm mb-4 uppercase tracking-wide">
               {lang === 'en' ? 'Somalia Office Map' : 'Khariidadda Xafiisyada Soomaaliya'}
             </h2>
-            {/* SVG-style Somalia silhouette map */}
             <div className="relative w-full aspect-[3/4] bg-[#0d1835] rounded-xl overflow-hidden border border-white/10">
-              {/* Simple Somalia shape using CSS clip */}
               <div className="absolute inset-4 rounded-xl" style={{
                 background: 'linear-gradient(135deg, #1a2454 60%, #1a3054 100%)',
                 clipPath: 'polygon(30% 5%, 55% 3%, 75% 8%, 90% 20%, 95% 35%, 88% 50%, 80% 60%, 70% 75%, 55% 88%, 45% 95%, 30% 90%, 20% 78%, 15% 65%, 12% 50%, 18% 35%, 22% 20%)',
               }} />
-
-              {/* State labels */}
               <div className="absolute text-[9px] text-white/25 font-bold" style={{ top: '18%', left: '30%' }}>WAQOOYI</div>
               <div className="absolute text-[9px] text-white/25 font-bold" style={{ top: '30%', left: '60%' }}>PUNTLAND</div>
               <div className="absolute text-[9px] text-white/25 font-bold" style={{ top: '48%', left: '52%' }}>GALMUDUG</div>
@@ -128,24 +95,22 @@ export default function BranchesPage() {
               <div className="absolute text-[9px] text-white/25 font-bold" style={{ top: '65%', left: '35%' }}>SW STATE</div>
               <div className="absolute text-[9px] text-white/25 font-bold" style={{ top: '72%', left: '50%' }}>JUBALAND</div>
 
-              {/* Office pins */}
-              {branches.map((b, i) => (
-                <div
-                  key={i}
-                  className="absolute transform -translate-x-1/2 -translate-y-1/2 group cursor-pointer"
-                  style={{ top: b.coordinates.top, left: b.coordinates.left }}
-                >
-                  <div className={`w-3.5 h-3.5 rounded-full border-2 ${b.type === 'HQ' ? 'bg-gold border-gold/80 w-5 h-5' : b.type === 'Liaison' ? 'bg-purple-400 border-purple-300' : 'bg-blue-400 border-blue-300'} shadow-lg`} />
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:block z-10">
-                    <div className="bg-[#0a1128] border border-white/20 rounded-lg px-2.5 py-1.5 whitespace-nowrap text-center">
-                      <p className="text-white text-[10px] font-bold">{b.region[lang]}</p>
-                      <p className="text-white/40 text-[9px]">{b.state[lang]}</p>
+              {branches.map((b, i) => {
+                const pos = PIN_POSITIONS[b.id] ?? { top: `${30 + i * 8}%`, left: `${40 + i * 5}%` };
+                return (
+                  <div key={b.id} className="absolute transform -translate-x-1/2 -translate-y-1/2 group cursor-pointer"
+                    style={{ top: pos.top, left: pos.left }}>
+                    <div className={`rounded-full border-2 shadow-lg ${b.type === 'HQ' ? 'w-5 h-5 bg-gold border-gold/80' : b.type === 'Liaison' ? 'w-3.5 h-3.5 bg-purple-400 border-purple-300' : 'w-3.5 h-3.5 bg-blue-400 border-blue-300'}`} />
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:block z-10">
+                      <div className="bg-[#0a1128] border border-white/20 rounded-lg px-2.5 py-1.5 whitespace-nowrap text-center">
+                        <p className="text-white text-[10px] font-bold">{lang === 'en' ? b.nameEn : b.nameSo}</p>
+                        <p className="text-white/40 text-[9px]">{lang === 'en' ? b.stateEn : b.stateSo}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
 
-              {/* Legend */}
               <div className="absolute bottom-3 right-3 bg-black/40 rounded-lg p-2 space-y-1">
                 <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-gold" /><span className="text-[9px] text-white/60">HQ</span></div>
                 <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-blue-400" /><span className="text-[9px] text-white/60">{lang === 'en' ? 'Branch' : 'Laanta'}</span></div>
@@ -156,44 +121,50 @@ export default function BranchesPage() {
 
           {/* Office List */}
           <div className="space-y-3 overflow-y-auto max-h-[600px] pr-1">
-            {branches.map((b, i) => (
-              <div key={i} className="bg-white/3 border border-white/8 rounded-xl p-4">
+            {branches.map((b) => (
+              <div key={b.id} className="bg-white/3 border border-white/8 rounded-xl p-4">
                 <div className="flex items-start justify-between mb-2">
                   <div>
                     <div className="flex items-center gap-2 mb-0.5">
-                      <h3 className="text-white font-bold text-sm">{b.region[lang]}</h3>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${stateColors[b.type]}`}>
+                      <h3 className="text-white font-bold text-sm">{lang === 'en' ? b.nameEn : b.nameSo}</h3>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${typeColors[b.type] ?? 'bg-white/10 border-white/20 text-white/60'}`}>
                         {b.type}
                       </span>
                     </div>
-                    <p className="text-white/35 text-xs">{b.state[lang]}</p>
+                    <p className="text-white/35 text-xs">{lang === 'en' ? b.stateEn : b.stateSo}</p>
                   </div>
                   <MapPin size={14} className="text-gold/50 flex-shrink-0 mt-0.5" />
                 </div>
                 <div className="space-y-1.5 text-xs text-white/45">
                   <div className="flex items-center gap-2">
                     <MapPin size={11} className="text-white/25 flex-shrink-0" />
-                    <span>{b.address[lang]}</span>
+                    <span>{lang === 'en' ? b.addressEn : b.addressSo}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Phone size={11} className="text-white/25 flex-shrink-0" />
-                    <span>{b.phone}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Mail size={11} className="text-white/25 flex-shrink-0" />
-                    <span>{b.email}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock size={11} className="text-white/25 flex-shrink-0" />
-                    <span>{b.hours[lang]}</span>
-                  </div>
+                  {b.phone && (
+                    <div className="flex items-center gap-2">
+                      <Phone size={11} className="text-white/25 flex-shrink-0" />
+                      <span>{b.phone}</span>
+                    </div>
+                  )}
+                  {b.email && (
+                    <div className="flex items-center gap-2">
+                      <Mail size={11} className="text-white/25 flex-shrink-0" />
+                      <span>{b.email}</span>
+                    </div>
+                  )}
+                  {b.hours && (
+                    <div className="flex items-center gap-2">
+                      <Clock size={11} className="text-white/25 flex-shrink-0" />
+                      <span>{b.hours}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Open new branch CTA */}
+        {/* CTA */}
         <div className="mt-10 text-center bg-gold/5 border border-gold/15 rounded-2xl p-8">
           <Building2 size={32} className="text-gold mx-auto mb-3" />
           <p className="text-white font-bold mb-1">

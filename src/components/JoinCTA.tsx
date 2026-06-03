@@ -26,14 +26,6 @@ export default function JoinCTA() {
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <div className="flex justify-center mb-6">
-            <svg viewBox="0 0 100 100" className="w-20 h-20">
-              <circle cx="50" cy="50" r="48" fill="#1a2454" stroke="#c9a227" strokeWidth="3" />
-              <path d="M28 50 A22 22 0 1 0 28 50.5 A14 14 0 1 1 28 50Z" fill="#c9a227" />
-              <polygon points="52,16 42,54 50,54 38,84 62,46 54,46" fill="#dc2626" />
-              <text x="56" y="70" fontSize="13" fontWeight="900" fill="white" fontFamily="Georgia,serif">XTS</text>
-            </svg>
-          </div>
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white mb-6">
             {lang === 'en' ? (
               <>Ready to Make a <span className="text-gold">Difference?</span></>

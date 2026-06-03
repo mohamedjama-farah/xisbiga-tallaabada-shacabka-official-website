@@ -42,7 +42,7 @@ const POLICIES = [
     icon: Globe,
     color: '#f97316',
     en: { title: 'Diaspora Rights', summary: 'Dual citizenship for all Somali diaspora. Online voter registration so diaspora can vote in elections. A dedicated Diaspora Ministry to serve Somalis abroad.', points: ['Dual citizenship right', 'Online diaspora voter registration', 'Ministry of Diaspora Affairs', 'Diaspora investment incentives', 'Consular services in all diaspora cities'] },
-    so: { title: 'Xuquuqda Masakinta', summary: 'Dhalashada laba-geesood ee dhammaan masakinta Soomaaliyeed. Diiwaangelinta cod-bixinta online si masakintu u codeeyaan doorashooyinka. Wasaarad u gaar ah adeegga Soomaalida dibedda.', points: ['Xuquuqda dhalashada laba-geesood', 'Diiwaangelinta cod-bixinta online', 'Wasaaradda Arrimaha Masakinta', 'Dhiirigelinta maalgashiga masakinta', 'Adeegyada qunsuliyadda magaalooyinka masakinta'] },
+    so: { title: 'Xuquuqda Qurbojoog', summary: 'Dhalashada laba-geesood ee dhammaan qurbojoogta Soomaaliyeed. Diiwaangelinta cod-bixinta online si qurbojoogtu u codeeyaan doorashooyinka. Wasaarad u gaar ah adeegga Soomaalida dibedda.', points: ['Xuquuqda dhalashada laba-geesood', 'Diiwaangelinta cod-bixinta online', 'Wasaaradda Arrimaha Qurbojoog', 'Dhiirigelinta maalgashiga qurbojoogta', 'Adeegyada qunsuliyadda magaalooyinka qurbojoogta'] },
   },
   {
     icon: Home,

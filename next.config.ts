@@ -5,6 +5,12 @@ const nextConfig: NextConfig = {
     formats: ['image/webp', 'image/avif'],
     unoptimized: false,
   },
+  // Allow large video uploads up to 500MB
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '500mb',
+    },
+  },
 };
 
 export default nextConfig;

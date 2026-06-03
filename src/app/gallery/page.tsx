@@ -34,7 +34,7 @@ export default function GalleryPage() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gold/10 border border-gold/30 text-gold text-xs font-semibold uppercase tracking-widest mb-6">
             <ImageIcon size={13} />
-            {lang === 'en' ? 'Media Gallery' : 'Gallariya Warbaahinta'}
+            {lang === 'en' ? 'Media Gallery' : 'Sawirrada Warbaahinta'}
           </div>
           <h1 className="text-4xl md:text-5xl font-black text-white mb-6 leading-tight">
             {lang === 'en' ? 'XTS in Action' : 'XTS Hawlgalka Gudaheeda'}
@@ -42,7 +42,7 @@ export default function GalleryPage() {
           <p className="text-white/60 text-lg leading-relaxed max-w-2xl mx-auto">
             {lang === 'en'
               ? 'Photos and media from XTS events, rallies, and community engagements across Somalia and the diaspora.'
-              : 'Sawirrada iyo warbaahinta dhacdooyinka XTS, xafladaha, iyo kulmida bulshada Soomaaliya oo dhan iyo masakinta.'}
+              : 'Sawirrada iyo warbaahinta dhacdooyinka XTS, xafladaha, iyo kulmida bulshada Soomaaliya oo dhan iyo qurbojoogta.'}
           </p>
         </motion.div>
       </div>

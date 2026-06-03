@@ -1,9 +1,48 @@
 'use client';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, Share2, MessageCircle, PlayCircle } from 'lucide-react';
+import { Mail, Phone, MapPin, PlayCircle, Share2, Send } from 'lucide-react';
 import { useLang } from '@/hooks/useLang';
-import { t } from '@/lib/i18n';
+import XTSLogoBolt from '@/components/XTSLogoBolt';
+
+const LINK_GROUPS = [
+  {
+    titleEn: 'Party',
+    titleSo: 'Xisbiga',
+    links: [
+      { href: '/about',   en: 'About XTS',            so: 'Xisbiga XTS' },
+      { href: '/policy',  en: 'Policy Platform',       so: 'Qorshaha Siyaasadeed' },
+      { href: '/news',    en: 'News',                  so: 'Wararka' },
+      { href: '/events',  en: 'Events',                so: 'Dhacdooyinka' },
+      { href: '/gallery', en: 'Gallery',               so: 'Sawirrada' },
+      { href: '/media',   en: 'Videos & Media',        so: 'Warbaahinta' },
+    ],
+  },
+  {
+    titleEn: 'Get Involved',
+    titleSo: 'Ka Qaybgal',
+    links: [
+      { href: '/join',            en: 'Join Us',           so: 'Noogu Soo Biir' },
+      { href: '/volunteer',       en: 'Volunteer',         so: 'Iskaa Wax u Qabso' },
+      { href: '/donate',          en: 'Donate',            so: 'Deeq' },
+      { href: '/candidates',      en: 'Our Candidates',    so: 'Musharaxiideena' },
+      { href: '/membership-card', en: 'Membership Card',   so: 'Kaarka Xubnimada' },
+      { href: '/diaspora',        en: 'Diaspora',          so: 'Qurbojoog' },
+    ],
+  },
+  {
+    titleEn: 'Resources',
+    titleSo: 'Macluumaad',
+    links: [
+      { href: '/vote',     en: 'How to Vote',          so: 'Sida Loo Codeyn' },
+      { href: '/niec',     en: 'Voter Registration',   so: 'Diiwaangelinta' },
+      { href: '/rights',   en: 'Constitutional Rights',so: 'Xuquuqda Dastuuriga' },
+      { href: '/faq',      en: 'FAQ',                  so: "Su'aalaha Badanaa" },
+      { href: '/branches', en: 'Branch Offices',       so: 'Xafiisyada' },
+      { href: '/contact',  en: 'Contact',              so: 'Xiriir' },
+    ],
+  },
+];
 
 export default function Footer() {
   const { lang } = useLang();
@@ -11,109 +50,77 @@ export default function Footer() {
   return (
     <footer className="bg-[#070e24] border-t border-gold/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-          {/* Brand */}
-          <div className="lg:col-span-2">
-            <div className="flex items-center gap-3 mb-5">
-              <svg viewBox="0 0 100 100" className="w-14 h-14">
-                <circle cx="50" cy="50" r="48" fill="#1a2454" stroke="#c9a227" strokeWidth="3" />
-                <path d="M28 50 A22 22 0 1 0 28 50.5 A14 14 0 1 1 28 50Z" fill="#c9a227" />
-                <polygon points="52,16 42,54 50,54 38,84 62,46 54,46" fill="#dc2626" />
-                <text x="56" y="70" fontSize="13" fontWeight="900" fill="white" fontFamily="Georgia,serif">XTS</text>
-              </svg>
-              <div>
-                <div className="text-gold font-bold text-base leading-tight">Xisbiga Tallaabada</div>
-                <div className="text-gold font-bold text-base leading-tight">Shacabka</div>
-              </div>
+
+        {/* ── Main grid ── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-10">
+
+          {/* Brand — 2 cols */}
+          <div className="xl:col-span-2">
+            <div className="mb-5">
+              <XTSLogoBolt size="md" animate={false} darkBg={true} />
             </div>
-            <p className="text-white/50 leading-relaxed max-w-sm mb-6">
+            <p className="text-white/45 text-sm leading-relaxed max-w-xs mb-7">
               {lang === 'en'
-                ? 'A new political movement dedicated to justice, unity, and progress for all Somali people.'
-                : 'Dhaqdhaqaaq siyaasadeed cusub oo u heellan cadaalad, midnimo, iyo horumar oo loogu talagalay dhammaan shacabka Soomaaliyeed.'}
+                ? 'A political movement dedicated to justice, unity, and progress for all Somali people.'
+                : 'Dhaqdhaqaaq siyaasadeed u heellan cadaalad, midnimo, iyo horumar shacabka Soomaaliyeed.'}
             </p>
-            <div className="flex gap-4">
-              {[Share2, MessageCircle, PlayCircle].map((Icon, i) => (
-                <motion.a
-                  key={i}
-                  href="#"
-                  whileHover={{ scale: 1.1, y: -2 }}
-                  className="w-10 h-10 rounded-full bg-white/5 border border-gold/20 flex items-center justify-center text-gold/60 hover:text-gold hover:border-gold transition-colors"
-                >
-                  <Icon size={18} />
+
+            {/* Contact */}
+            <ul className="space-y-3 mb-7">
+              {[
+                { Icon: Mail,  text: 'info@xts-party.so' },
+                { Icon: Phone, text: '+252 61 XXX XXXX' },
+                { Icon: MapPin,text: 'Mogadishu, Somalia' },
+              ].map(({ Icon, text }) => (
+                <li key={text} className="flex items-center gap-3 text-white/40 text-xs">
+                  <Icon size={13} className="text-gold shrink-0" />
+                  {text}
+                </li>
+              ))}
+            </ul>
+
+            {/* Social icons */}
+            <div className="flex gap-3">
+              {[
+                { Icon: PlayCircle, href: '#' },
+                { Icon: Share2, href: '#' },
+                { Icon: Send, href: '#' },
+              ].map(({ Icon, href }, i) => (
+                <motion.a key={i} href={href} target="_blank" rel="noopener noreferrer"
+                  whileHover={{ scale: 1.12, y: -2 }}
+                  className="w-9 h-9 rounded-full bg-white/5 border border-gold/20 flex items-center justify-center text-gold/50 hover:text-gold hover:border-gold/60 transition-colors">
+                  <Icon size={15} />
                 </motion.a>
               ))}
             </div>
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h4 className="text-white font-bold mb-5 text-sm uppercase tracking-widest">
-              {lang === 'en' ? 'Quick Links' : 'Xiriiriyaasha Degdega ah'}
-            </h4>
-            <ul className="space-y-3">
-              {[
-                { href: '/about', en: 'About XTS', so: 'Xisbiga XTS' },
-                { href: '/policy', en: 'Policy Platform', so: 'Qorshaha Siyaasadeed' },
-                { href: '/rights', en: 'Constitutional Rights', so: 'Xuquuqda Dastuuriga' },
-                { href: '/system', en: 'How Somalia Works', so: 'Nidaamka Soomaaliya' },
-                { href: '/events', en: 'Events', so: 'Dhacdooyinka' },
-                { href: '/gallery', en: 'Gallery', so: 'Gallariya' },
-                { href: '/news', en: 'News', so: 'Wararka' },
-                { href: '/faq', en: 'FAQ', so: "Su'aalaha" },
-                { href: '/candidates',    en: 'Our Candidates',      so: 'Musharaxiideena' },
-                { href: '/petition',      en: 'Petitions',           so: 'Codsiyo' },
-                { href: '/unity',         en: 'Clan-Neutral Unity',  so: 'Midnimada Qabiilka' },
-                { href: '/states',        en: 'Federal States',      so: 'Gobolada Federaalka' },
-                { href: '/niec',          en: 'Voter Registration',  so: 'Diiwaangelinta' },
-                { href: '/media',         en: 'Videos & Media',      so: 'Fiidiyowyada' },
-                { href: '/complaint',     en: 'Report an Issue',     so: 'Soo Gudbi Arrin' },
-                { href: '/poll',          en: 'Member Polls',        so: "Ra'yiyadda" },
-                { href: '/membership-card', en: 'Membership Card',  so: 'Kaarka Xubnimada' },
-                { href: '/materials',     en: 'Party Materials',     so: 'Agabka Xisbiga' },
-                { href: '/branches',      en: 'Branch Offices',      so: 'Xafiisyada' },
-                { href: '/volunteer',     en: 'Volunteer',           so: 'Volunteer' },
-                { href: '/diaspora',      en: 'Diaspora',            so: 'Masakinta' },
-                { href: '/vote',          en: 'How to Vote',         so: 'Sida Loo Codeyn' },
-                { href: '/join',          en: 'Join Us',             so: 'Noogu Soo Biir' },
-                { href: '/donate',        en: 'Donate',              so: 'Xiwaal' },
-                { href: '/contact',       en: 'Contact',             so: 'Xiriir' },
-              ].map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="text-white/50 hover:text-gold transition-colors text-sm">
-                    {lang === 'en' ? link.en : link.so}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Contact */}
-          <div>
-            <h4 className="text-white font-bold mb-5 text-sm uppercase tracking-widest">
-              {lang === 'en' ? 'Contact' : 'Xiriir'}
-            </h4>
-            <ul className="space-y-4">
-              <li className="flex items-center gap-3 text-white/50 text-sm">
-                <Mail size={16} className="text-gold shrink-0" />
-                info@xts-party.so
-              </li>
-              <li className="flex items-center gap-3 text-white/50 text-sm">
-                <Phone size={16} className="text-gold shrink-0" />
-                +252 61 XXX XXXX
-              </li>
-              <li className="flex items-start gap-3 text-white/50 text-sm">
-                <MapPin size={16} className="text-gold shrink-0 mt-0.5" />
-                Mogadishu, Somalia
-              </li>
-            </ul>
-          </div>
+          {/* Link groups — 3 cols */}
+          {LINK_GROUPS.map(group => (
+            <div key={group.titleEn}>
+              <h4 className="text-white font-bold text-xs uppercase tracking-[0.18em] mb-5">
+                {lang === 'en' ? group.titleEn : group.titleSo}
+              </h4>
+              <ul className="space-y-3">
+                {group.links.map(link => (
+                  <li key={link.href}>
+                    <Link href={link.href}
+                      className="text-white/40 hover:text-gold transition-colors text-sm leading-snug">
+                      {lang === 'en' ? link.en : link.so}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
-        <div className="mt-12 pt-8 border-t border-gold/10 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-white/30 text-sm">
-            © {new Date().getFullYear()} {t('footer.party', lang)}. {t('footer.rights', lang)}
+        {/* ── Bottom bar ── */}
+        <div className="mt-14 pt-7 border-t border-white/6 flex flex-col sm:flex-row justify-between items-center gap-3">
+          <p className="text-white/25 text-xs">
+            © {new Date().getFullYear()} Xisbiga Tallaabada Shacabka. All rights reserved.
           </p>
-          <p className="text-white/20 text-xs">
+          <p className="text-white/15 text-xs">
             {lang === 'en' ? 'Built with integrity and transparency.' : 'Daacadnimo iyo caddaansho lagu dhisay.'}
           </p>
         </div>

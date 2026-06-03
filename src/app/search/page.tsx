@@ -146,7 +146,7 @@ export default function SearchPage() {
                 { en: 'Join Us', so: 'Biir', href: '/join' },
                 { en: 'Events', so: 'Dhacdooyin', href: '/events' },
                 { en: 'News', so: 'Wararka', href: '/news' },
-                { en: 'Gallery', so: 'Gallariya', href: '/gallery' },
+                { en: 'Gallery', so: 'Sawirrada', href: '/gallery' },
                 { en: 'Contact', so: 'Xiriir', href: '/contact' },
                 { en: 'FAQ', so: "Su'aal", href: '/faq' },
               ].map(p => (

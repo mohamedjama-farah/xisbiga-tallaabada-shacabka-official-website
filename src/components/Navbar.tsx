@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import XTSLogoBolt from '@/components/XTSLogoBolt';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Globe, Heart, ChevronDown, Search } from 'lucide-react';
 import { useLang } from '@/hooks/useLang';
@@ -43,9 +44,9 @@ const navLinks: NavLink[] = [
       { href: '/representatives', en: 'Representatives',     so: 'Wakiilada' },
       { href: '/women',           en: "Women's Wing",        so: 'Goobta Haweenka' },
       { href: '/youth',           en: 'Youth Wing',          so: 'Goobta Dhalinyarada' },
-      { href: '/diaspora',        en: 'Diaspora',            so: 'Masakinta' },
-      { href: '/volunteer',       en: 'Volunteer / Canvass', so: 'Volunteer / Xooge' },
-      { href: '/poll',            en: 'Member Polls',        so: "Ra'yiyadda" },
+      { href: '/diaspora',        en: 'Diaspora',            so: 'Qurbojoog' },
+      { href: '/volunteer',       en: 'Volunteer / Canvass', so: 'Iskaa Wax u Qabso' },
+      { href: '/poll',            en: 'Member Polls',        so: "Ra'yi-ururinta" },
       { href: '/petition',        en: 'Petitions',           so: 'Codsiyo' },
     ],
   },
@@ -54,13 +55,13 @@ const navLinks: NavLink[] = [
     so: 'Dheeraad',
     children: [
       { href: '/events',  en: 'Events',             so: 'Dhacdooyinka' },
-      { href: '/gallery', en: 'Gallery',            so: 'Gallariya' },
+      { href: '/gallery', en: 'Gallery',            so: 'Sawirrada' },
       { href: '/news',    en: 'News',               so: 'Wararka' },
       { href: '/media',   en: 'Videos & Media',     so: 'Fiidiyowyada' },
       { href: '/data',    en: 'Crisis Data',        so: 'Xogta' },
       { href: '/niec',    en: 'Voter Registration', so: 'Diiwaangelinta' },
-      { href: '/faq',     en: 'FAQ',                so: "Su'aalaha" },
-      { href: '/contact', en: 'Contact',            so: 'Xiriir' },
+      { href: '/faq',     en: 'FAQ',                so: "Su'aalaha Badanaa" },
+      { href: '/contact', en: 'Contact',            so: 'Na la Xiriir' },
     ],
   },
 ];
@@ -142,14 +143,8 @@ export default function Navbar() {
         <div className="flex items-center h-20 gap-8">
 
           {/* ── Logo ── */}
-          <Link href="/" className="flex items-center gap-3 flex-shrink-0">
-            <div className="relative w-11 h-11 rounded-full overflow-hidden border-2 border-gold/40 bg-[#1a2454]">
-              <Image src="/logo.png" alt="XTS Logo" fill sizes="44px" className="object-contain p-0.5" priority />
-            </div>
-            <div className="hidden sm:block leading-tight">
-              <div className="text-gold font-bold text-sm">Xisbiga Tallaabada</div>
-              <div className="text-gold font-bold text-sm">Shacabka</div>
-            </div>
+          <Link href="/" className="flex-shrink-0">
+            <XTSLogoBolt size="sm" animate={false} darkBg={true} />
           </Link>
 
           {/* ── Desktop nav ── */}
@@ -180,7 +175,7 @@ export default function Navbar() {
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 border border-red-500/40 text-red-400 font-bold text-xs rounded-full hover:bg-red-500/20 transition-all whitespace-nowrap"
               >
                 <Heart size={12} className="fill-red-400/40" />
-                {lang === 'en' ? 'Donate' : 'Xiwaal'}
+                {lang === 'en' ? 'Donate' : 'Deeq'}
               </Link>
 
               <Link
@@ -269,7 +264,7 @@ export default function Navbar() {
                 <Link href="/donate" onClick={() => setOpen(false)}
                   className="flex items-center justify-center gap-2 py-3 bg-red-500/10 border border-red-500/30 text-red-400 font-bold rounded-full">
                   <Heart size={15} className="fill-red-400/40" />
-                  {lang === 'en' ? 'Donate' : 'Xiwaal'}
+                  {lang === 'en' ? 'Donate' : 'Deeq'}
                 </Link>
                 <button onClick={() => setLang(lang === 'en' ? 'so' : 'en')}
                   className="flex items-center justify-center gap-2 text-white/60 hover:text-gold py-2 text-sm">

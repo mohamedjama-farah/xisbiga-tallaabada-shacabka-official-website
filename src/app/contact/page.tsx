@@ -62,7 +62,7 @@ export default function ContactPage() {
           >
             <div>
               <h2 className="text-2xl font-bold text-white mb-4">
-                {lang === 'en' ? 'Get in Touch' : 'Nala Xiriir'}
+                {lang === 'en' ? 'Get in Touch' : 'Na la Xiriir'}
               </h2>
               <p className="text-white/60 leading-relaxed">
                 {lang === 'en'

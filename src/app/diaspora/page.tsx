@@ -30,7 +30,7 @@ const HOW_YOU_CAN_HELP = [
     icon: DollarSign,
     color: '#22c55e',
     en: { title: 'Donate to the Cause', desc: 'Financial support from the diaspora powers our campaigns, printing, events and staff. Every dollar helps. 100% of donations go directly to party operations.' },
-    so: { title: 'Ku Deeq Haybadda', desc: 'Taageerada maaliyadeed ee masakintu waxay awoodaysaa ololeheenna, daabacadda, dhacdooyinka iyo shaqaalaha. Doolarka kasta wuu caawiyaa. 100% deeqaha si toos ah ayay u tagaan hawlgalka xisbiga.' },
+    so: { title: 'Ku Deeq Haybadda', desc: 'Taageerada maaliyadeed ee qurbojoogtu waxay awoodaysaa ololeheenna, daabacadda, dhacdooyinka iyo shaqaalaha. Doolarka kasta wuu caawiyaa. 100% deeqaha si toos ah ayay u tagaan hawlgalka xisbiga.' },
   },
   {
     icon: Users,
@@ -54,17 +54,17 @@ const HOW_YOU_CAN_HELP = [
     icon: Phone,
     color: '#f97316',
     en: { title: 'Register a Diaspora Chapter', desc: 'Start an official XTS chapter in your city. Contact us to get registered, receive materials, and be connected to the national party structure.' },
-    so: { title: 'Diiwaangeli Qaybta Masakinta', desc: 'Bilow qaybta rasmi ah ee XTS magaalaadaada. Nala xiriir si aad u diiwaangashan tahay, agabka hesho, oo lala xidho qaab-dhismeedka xisbiga qaranka.' },
+    so: { title: 'Diiwaangeli Qaybta Qurbojoog', desc: 'Bilow qaybta rasmi ah ee XTS magaalaadaada. Nala xiriir si aad u diiwaangashan tahay, agabka hesho, oo lala xidho qaab-dhismeedka xisbiga qaranka.' },
   },
 ];
 
 const XTS_COMMITMENTS = [
-  { en: 'Push for dual citizenship rights for all Somali diaspora', so: 'U diririda xuquuqda dhalashada laba-geesood ee dhammaan masakinta Soomaaliyeed' },
-  { en: 'Online voter registration so diaspora can vote from abroad', so: 'Diiwaangelinta cod-bixinta online si masakintu u codeeyaan dibedda' },
-  { en: 'Ministry of Diaspora Affairs with real budget and power', so: 'Wasaaradda Arrimaha Masakinta oo haysata miisaaniye iyo awood runta ah' },
-  { en: 'Consular services expanded to all major diaspora cities', so: 'Adeegyada qunsuliyadda oo u fidsan dhammaan magaalooyinka masakinta ee weyn' },
-  { en: 'Diaspora investment protections and business incentives', so: 'Ilaalinada maalgashiga masakinta iyo dhiirigelinta ganacsiga' },
-  { en: 'Regular diaspora town halls and feedback sessions', so: 'Shirarka bulshada ee masakinta iyo xaladaha jawaab-celinta si joogto ah' },
+  { en: 'Push for dual citizenship rights for all Somali diaspora', so: 'U diririda xuquuqda dhalashada laba-geesood ee dhammaan qurbojoogta Soomaaliyeed' },
+  { en: 'Online voter registration so diaspora can vote from abroad', so: 'Diiwaangelinta cod-bixinta online si qurbojoogtu u codeeyaan dibedda' },
+  { en: 'Ministry of Diaspora Affairs with real budget and power', so: 'Wasaaradda Arrimaha Qurbojoog oo haysata miisaaniye iyo awood runta ah' },
+  { en: 'Consular services expanded to all major diaspora cities', so: 'Adeegyada qunsuliyadda oo u fidsan dhammaan magaalooyinka qurbojoogta ee weyn' },
+  { en: 'Diaspora investment protections and business incentives', so: 'Ilaalinada maalgashiga qurbojoogta iyo dhiirigelinta ganacsiga' },
+  { en: 'Regular diaspora town halls and feedback sessions', so: 'Shirarka bulshada ee qurbojoogta iyo xaladaha jawaab-celinta si joogto ah' },
 ];
 
 export default function DiasporaPage() {
@@ -91,15 +91,15 @@ export default function DiasporaPage() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gold/10 border border-gold/30 text-gold text-xs font-semibold uppercase tracking-widest mb-6">
             <Globe size={13} />
-            {lang === 'en' ? 'Somali Diaspora' : 'Masakinta Soomaaliyeed'}
+            {lang === 'en' ? 'Somali Diaspora' : 'Qurbojoogta Soomaaliyeed'}
           </div>
           <h1 className="text-4xl md:text-5xl font-black text-white mb-6 leading-tight">
-            {lang === 'en' ? 'The Diaspora Is Part of Somalia' : 'Masakintu Waa Qayb Ka Mid Ah Soomaaliya'}
+            {lang === 'en' ? 'The Diaspora Is Part of Somalia' : 'Qurbojoogtu Waa Qayb Ka Mid Ah Soomaaliya'}
           </h1>
           <p className="text-white/60 text-lg leading-relaxed max-w-2xl mx-auto">
             {lang === 'en'
               ? 'Whether you are in Minneapolis, London, or Dubai — XTS is your party too. The diaspora sends billions to Somalia every year. Now it\'s time your voice is heard in its politics.'
-              : 'Mineaapolis, London, ama Dubai ha joogteen — XTS xisbigaaga ayuu yahay. Masakintu sannad kasta bilyan ayay u diraysaa Soomaaliya. Hadda waa waqtiga cod-haynta siyaasaddeeda la maqlo.'}
+              : 'Mineaapolis, London, ama Dubai ha joogteen — XTS xisbigaaga ayuu yahay. Qurbojoogtu sannad kasta bilyan ayay u diraysaa Soomaaliya. Hadda waa waqtiga cod-haynta siyaasaddeeda la maqlo.'}
           </p>
         </motion.div>
       </div>
@@ -160,7 +160,7 @@ export default function DiasporaPage() {
       <div className="max-w-3xl mx-auto px-4 mb-20">
         <div className="bg-gradient-to-br from-gold/10 to-transparent border border-gold/20 rounded-2xl p-8">
           <h2 className="text-xl font-bold text-white mb-6">
-            {lang === 'en' ? 'XTS Commitments to the Diaspora' : 'Ballanqaadyada XTS ee Masakinta'}
+            {lang === 'en' ? 'XTS Commitments to the Diaspora' : 'Ballanqaadyada XTS ee Qurbojoogta'}
           </h2>
           <div className="space-y-3">
             {XTS_COMMITMENTS.map((item, i) => (
@@ -185,7 +185,7 @@ export default function DiasporaPage() {
         <div className="bg-white/5 border border-white/10 rounded-2xl p-8">
           <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
             <Mail size={20} className="text-gold" />
-            {lang === 'en' ? 'Connect With XTS Diaspora' : 'La Xiriir XTS Masakinta'}
+            {lang === 'en' ? 'Connect With XTS Diaspora' : 'La Xiriir XTS Qurbojoog'}
           </h2>
           <p className="text-white/50 text-sm mb-6">
             {lang === 'en' ? 'Tell us where you are and how you want to help. We will be in touch.' : 'Noo sheeg halkaad joogto iyo sida aad u caawin lahayd. Waan kula soo xidhiidhi doonaa.'}

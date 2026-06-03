@@ -7,10 +7,15 @@ import { securityHeaders } from '@/lib/security';
 export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: securityHeaders });
-
-  const subscribers = await prisma.newsletterSubscriber.findMany({
-    orderBy: { createdAt: 'desc' },
-  });
-
-  return NextResponse.json({ subscribers }, { headers: securityHeaders });
+  try {
+  
+    const subscribers = await prisma.newsletterSubscriber.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+  
+    return NextResponse.json({ subscribers }, { headers: securityHeaders });
+    } catch (e) {
+    console.error('[newsletter]', e);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
 }

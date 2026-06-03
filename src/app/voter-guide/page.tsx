@@ -21,7 +21,7 @@ export default function VoterGuidePrint() {
         <div className="text-center border-b-4 border-[#1a2454] pb-6 mb-8">
           <div className="flex items-center justify-center gap-4 mb-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="XTS" className="w-16 h-16 object-contain" />
+            <svg viewBox="0 0 100 100" width="64" height="64"><defs><linearGradient id="vg-r" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#1e2e80"/><stop offset="100%" stopColor="#111836"/></linearGradient><linearGradient id="vg-b" x1="0.6" y1="0" x2="0.2" y2="1"><stop offset="0%" stopColor="#fff"/><stop offset="40%" stopColor="#ffe57a"/><stop offset="100%" stopColor="#c9a227"/></linearGradient></defs><circle cx="50" cy="50" r="47" fill="none" stroke="#c9a227" strokeWidth="0.8" strokeOpacity="0.5"/><circle cx="50" cy="50" r="40" fill="none" stroke="url(#vg-r)" strokeWidth="15"/><circle cx="50" cy="50" r="33" fill="none" stroke="#c9a227" strokeWidth="0.6" strokeOpacity="0.35"/><path d="M 62,2 L 40,52 L 55,52 L 32,98 L 54,48 L 39,48 Z" fill="url(#vg-b)"/><path d="M 62,2 L 40,52 L 44,52 L 66,2 Z" fill="white" fillOpacity="0.5"/></svg>
             <div className="text-left">
               <div className="text-[#1a2454] font-black text-xl leading-tight">Xisbiga Tallaabada Shacabka</div>
               <div className="text-[#c9a227] font-bold text-sm">The People&apos;s Progress Party — XTS</div>

@@ -2,11 +2,11 @@ export type Lang = 'so' | 'en';
 
 export const translations = {
   nav: {
-    home: { en: 'Home', so: 'Guriga' },
-    about: { en: 'About', so: 'Naga' },
+    home: { en: 'Home', so: 'Bogga Hore' },
+    about: { en: 'About', so: 'Naga Waran' },
     news: { en: 'News', so: 'Wararka' },
     join: { en: 'Join Us', so: 'Noogu Soo Biir' },
-    contact: { en: 'Contact', so: 'Xiriir' },
+    contact: { en: 'Contact', so: 'Na la Xiriir' },
   },
   hero: {
     tagline: {

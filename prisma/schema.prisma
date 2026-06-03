@@ -257,3 +257,60 @@ model SiteSetting {
   value     String
   updatedAt DateTime @updatedAt
 }
+
+model FAQ {
+  id         String   @id @default(cuid())
+  questionEn String
+  questionSo String
+  answerEn   String   @db.Text
+  answerSo   String   @db.Text
+  category   String   @default("General")
+  sortOrder  Int      @default(0)
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Branch {
+  id        String   @id @default(cuid())
+  nameEn    String
+  nameSo    String
+  stateEn   String
+  stateSo   String
+  addressEn String
+  addressSo String
+  phone     String?
+  email     String?
+  hours     String?
+  type      String   @default("Branch")
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Video {
+  id        String   @id @default(cuid())
+  titleEn   String
+  titleSo   String
+  descEn    String?
+  descSo    String?
+  videoId   String   @default("")   // YouTube video ID (empty if local)
+  videoUrl  String?                 // Local file path e.g. /uploads/videos/file.mp4
+  featured  Boolean  @default(false)
+  date      String?
+  sortOrder Int      @default(0)
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model PageContent {
+  id        String   @id @default(cuid())
+  page      String   // e.g. "home", "about", "policy"
+  section   String   // e.g. "hero.title", "mission.text"
+  lang      String   // "en" or "so"
+  content   String   @db.Text
+  updatedAt DateTime @updatedAt
+
+  @@unique([page, section, lang])
+  @@index([page])
+}

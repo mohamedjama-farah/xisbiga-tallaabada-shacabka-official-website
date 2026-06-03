@@ -3,8 +3,8 @@ import { motion } from 'framer-motion';
 import { signIn } from 'next-auth/react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
+import XTSLogoBolt from '@/components/XTSLogoBolt';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -40,12 +40,12 @@ export default function AdminLoginPage() {
         animate={{ opacity: 1, scale: 1 }}
         className="w-full max-w-md"
       >
-        <div className="text-center mb-10">
-          <div className="relative w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden border-2 border-gold/50 bg-[#1a2454]">
-            <Image src="/logo.png" alt="XTS Logo" fill sizes="44px" className="object-contain p-1" priority />
+        <div className="flex flex-col items-center mb-10 gap-4">
+          <XTSLogoBolt size="lg" animate={true} darkBg={true} />
+          <div className="text-center">
+            <h1 className="text-2xl font-black text-white mt-2">Admin Portal</h1>
+            <p className="text-white/30 text-xs mt-1 uppercase tracking-widest">Secure Access</p>
           </div>
-          <h1 className="text-3xl font-black text-white">Admin Portal</h1>
-          <p className="text-white/40 text-sm mt-2">Xisbiga Tallaabada Shacabka</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white/5 border border-gold/20 rounded-3xl p-8 space-y-6">

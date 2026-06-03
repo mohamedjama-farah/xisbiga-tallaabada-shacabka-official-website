@@ -58,10 +58,10 @@ export async function GET(req: NextRequest) {
     { title: 'Youth Wing', titleSo: 'Goobta Dhalinyarada', href: '/youth', keywords: ['youth', 'dhalinyaro', 'young', 'da'] },
     { title: 'Volunteer', titleSo: 'Volunteer', href: '/volunteer', keywords: ['volunteer', 'canvass', 'help', 'caawi'] },
     { title: 'Contact', titleSo: 'Xiriir', href: '/contact', keywords: ['contact', 'xiriir', 'email', 'phone'] },
-    { title: 'Donate', titleSo: 'Xiwaal', href: '/donate', keywords: ['donate', 'xiwaal', 'money', 'lacag', 'support'] },
+    { title: 'Donate', titleSo: 'Deeq', href: '/donate', keywords: ['donate', 'xiwaal', 'money', 'lacag', 'support'] },
     { title: 'FAQ', titleSo: "Su'aalaha Badanaa", href: '/faq', keywords: ['faq', 'question', 'su\'aal', 'help', 'caawi'] },
-    { title: 'Gallery', titleSo: 'Gallariya', href: '/gallery', keywords: ['gallery', 'gallariya', 'photo', 'sawir'] },
-    { title: 'Diaspora', titleSo: 'Masakinta', href: '/diaspora', keywords: ['diaspora', 'masaakinta', 'abroad', 'dibadda'] },
+    { title: 'Gallery', titleSo: 'Sawirrada', href: '/gallery', keywords: ['gallery', 'sawirrada', 'photo', 'sawir'] },
+    { title: 'Diaspora', titleSo: 'Qurbojoog', href: '/diaspora', keywords: ['diaspora', 'qurbojoog', 'abroad', 'dibadda'] },
     { title: 'Branch Offices', titleSo: 'Xafiisyada', href: '/branches', keywords: ['office', 'xafiis', 'branch', 'laanta', 'location'] },
     { title: 'Party Constitution', titleSo: 'Dastuurka Xisbiga', href: '/party/constitution', keywords: ['constitution', 'dastuur', 'party rules', 'xeerka'] },
   ].filter(p => p.keywords.some(kw => kw.includes(term) || term.includes(kw)));

@@ -49,7 +49,7 @@ const ARTICLES: Article[] = [
   {
     num: 8,
     en: { title: 'Diaspora Membership', content: 'Somalis living outside Somalia are entitled to full XTS membership and the rights that come with it, including the right to vote in party elections and to stand as party candidates. XTS shall establish diaspora chapters in countries with significant Somali populations. Diaspora members may vote in party elections online through a secure verified system. XTS commits to pushing for diaspora voting rights in Somali national elections.' },
-    so: { title: 'Xubinnimada Masakinta', content: 'Soomaalida ku nool dibedda Soomaaliya waxay xaq u leeyihiin xubinnimada buuxda ee XTS iyo xuquuqaha la socda, oo ay ku jiraan xaqa u codeynta doorashooyinka xisbiga iyo inay u taagan yihiin musharaxiinta xisbiga. XTS waxay aasaasi doontaa qaybaha masakinta dalalka ay ku nool yihiin dad Soomaali ah oo badan. Xubnaha masakinta waxay u codeeyn karaan doorashooyinka xisbiga online nidaam xaqiijin ammaan leh iyaga loo marayo. XTS waxay u heellan tahay in la dagaalamo xuquuqda codeynta masakinta doorashooyinka qaranka Soomaaliya.' },
+    so: { title: 'Xubinnimada Qurbojoog', content: 'Soomaalida ku nool dibedda Soomaaliya waxay xaq u leeyihiin xubinnimada buuxda ee XTS iyo xuquuqaha la socda, oo ay ku jiraan xaqa u codeynta doorashooyinka xisbiga iyo inay u taagan yihiin musharaxiinta xisbiga. XTS waxay aasaasi doontaa qaybaha qurbojoogta dalalka ay ku nool yihiin dad Soomaali ah oo badan. Xubnaha qurbojoogta waxay u codeeyn karaan doorashooyinka xisbiga online nidaam xaqiijin ammaan leh iyaga loo marayo. XTS waxay u heellan tahay in la dagaalamo xuquuqda codeynta qurbojoogta doorashooyinka qaranka Soomaaliya.' },
   },
   {
     num: 9,

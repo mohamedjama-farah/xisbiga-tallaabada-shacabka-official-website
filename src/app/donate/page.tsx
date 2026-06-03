@@ -454,21 +454,6 @@ export default function DonatePage() {
               : 'Xiwaalad kasta waxay si toos ah u maalgelisaa hawsheenna si aan Soomaaliya nabadeed, cadaalad leh, oo barwaaqaysan u dhisno. Dhammaan hababka lacag-bixinta Soomaaliya ayaa la aqbalaa.'}
           </motion.p>
 
-          {/* Impact stats */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
-            className="flex flex-wrap justify-center gap-6 text-sm">
-            {[
-              { en: '$5 feeds a family for a day', so: '$5 waxay quudinaysaa qoys maalintii' },
-              { en: '$25 trains one soldier', so: '$25 waxay tababaraysaa askari' },
-              { en: '$100 builds a school desk', so: '$100 waxay dhisaysaa miis dugsi' },
-              { en: '$250 funds a month of water access', so: '$250 waxay maalgelisaa biyo bil' },
-            ].map((s, i) => (
-              <div key={i} className="flex items-center gap-2 px-4 py-2 rounded-full bg-gold/10 border border-gold/20">
-                <span className="text-gold">✦</span>
-                <span className="text-white/70">{lang === 'en' ? s.en : s.so}</span>
-              </div>
-            ))}
-          </motion.div>
         </div>
       </section>
 

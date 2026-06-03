@@ -16,13 +16,13 @@ export default function DonationProgressBar() {
   const [stats, setStats] = useState<DonationStats | null>(null);
 
   useEffect(() => {
-    fetch('/api/admin/donation-goal')
+    fetch('/api/donation-goal')
       .then(r => r.json())
       .then(setStats)
       .catch(() => {});
   }, []);
 
-  if (!stats || stats.raised === 0) return null;
+  if (!stats) return null;
 
   return (
     <div className="bg-gradient-to-r from-gold/10 to-gold/5 border border-gold/20 rounded-2xl p-5">
