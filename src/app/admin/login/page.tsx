@@ -42,7 +42,7 @@ export default function AdminLoginPage() {
       >
         <div className="text-center mb-10">
           <div className="relative w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden border-2 border-gold/50 bg-[#1a2454]">
-            <Image src="/logo.png" alt="XTS Logo" fill className="object-contain p-1" priority />
+            <Image src="/logo.png" alt="XTS Logo" fill sizes="44px" className="object-contain p-1" priority />
           </div>
           <h1 className="text-3xl font-black text-white">Admin Portal</h1>
           <p className="text-white/40 text-sm mt-2">Xisbiga Tallaabada Shacabka</p>

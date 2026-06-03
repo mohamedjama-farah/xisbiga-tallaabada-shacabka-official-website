@@ -439,7 +439,7 @@ export default function AdminDashboard() {
             {/* Brand */}
             <div className="p-5 border-b border-white/8 flex items-center gap-3">
               <div className="relative w-11 h-11 rounded-full overflow-hidden border-2 border-gold/40 bg-[#1a2454] shrink-0">
-                <Image src="/logo.png" alt="XTS" fill className="object-contain p-0.5" priority />
+                <Image src="/logo.png" alt="XTS" fill sizes="44px" className="object-contain p-0.5" priority />
               </div>
               <div>
                 <div className="text-gold font-black text-sm leading-tight">XTS Admin</div>

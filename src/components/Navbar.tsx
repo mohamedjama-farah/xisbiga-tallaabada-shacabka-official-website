@@ -144,7 +144,7 @@ export default function Navbar() {
           {/* ── Logo ── */}
           <Link href="/" className="flex items-center gap-3 flex-shrink-0">
             <div className="relative w-11 h-11 rounded-full overflow-hidden border-2 border-gold/40 bg-[#1a2454]">
-              <Image src="/logo.png" alt="XTS Logo" fill className="object-contain p-0.5" priority />
+              <Image src="/logo.png" alt="XTS Logo" fill sizes="44px" className="object-contain p-0.5" priority />
             </div>
             <div className="hidden sm:block leading-tight">
               <div className="text-gold font-bold text-sm">Xisbiga Tallaabada</div>

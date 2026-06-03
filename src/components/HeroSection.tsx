@@ -170,7 +170,7 @@ export default function HeroSection() {
               <motion.div animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.9, 0.4] }} transition={{ duration: 3, repeat: Infinity }}
                 className="absolute inset-0 rounded-full" style={{ boxShadow: '0 0 40px 8px rgba(201,162,39,0.35)' }} />
               <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-gold/50 shadow-2xl">
-                <Image src="/logo.png" alt="XTS" fill className="object-contain p-1" priority />
+                <Image src="/logo.png" alt="XTS" fill sizes="44px" className="object-contain p-1" priority />
               </div>
             </div>
             <div>
