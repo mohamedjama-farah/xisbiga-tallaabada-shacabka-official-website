@@ -115,6 +115,28 @@ export default function HeroSection() {
         </motion.div>
       </AnimatePresence>
 
+      {/* ── Aurora orbs ── */}
+      <div className="absolute inset-0 z-[1] pointer-events-none overflow-hidden">
+        <motion.div
+          animate={{ x: [0, 80, -40, 0], y: [0, -60, 40, 0], scale: [1, 1.3, 0.9, 1] }}
+          transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute top-[-10%] left-[-5%] w-[600px] h-[600px] rounded-full opacity-[0.12]"
+          style={{ background: 'radial-gradient(circle, #c9a227, transparent 70%)', filter: 'blur(80px)' }}
+        />
+        <motion.div
+          animate={{ x: [0, -60, 50, 0], y: [0, 50, -30, 0], scale: [1, 0.8, 1.2, 1] }}
+          transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut', delay: 4 }}
+          className="absolute bottom-[-20%] right-[-10%] w-[700px] h-[700px] rounded-full opacity-[0.08]"
+          style={{ background: 'radial-gradient(circle, #3b82f6, transparent 70%)', filter: 'blur(100px)' }}
+        />
+        <motion.div
+          animate={{ x: [0, 40, -20, 0], y: [0, -40, 60, 0], scale: [1, 1.1, 0.95, 1] }}
+          transition={{ duration: 26, repeat: Infinity, ease: 'easeInOut', delay: 8 }}
+          className="absolute top-[30%] right-[20%] w-[400px] h-[400px] rounded-full opacity-[0.07]"
+          style={{ background: 'radial-gradient(circle, #ef4444, transparent 70%)', filter: 'blur(70px)' }}
+        />
+      </div>
+
       {/* ── Fine dot grid ── */}
       <div className="absolute inset-0 z-[1] pointer-events-none"
         style={{ backgroundImage: 'radial-gradient(circle, rgba(201,162,39,0.18) 1px, transparent 1px)', backgroundSize: '36px 36px' }} />
@@ -176,11 +198,20 @@ export default function HeroSection() {
               <motion.div key={`headline-${safeSlide}-${lang}`} className="space-y-1">
                 {content.headline.map((word, wi) => (
                   <motion.div key={wi}
-                    initial={{ y: 90, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
+                    initial={{ y: 90, opacity: 0, filter: 'blur(12px)' }}
+                    animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
                     exit={{ y: -60, opacity: 0 }}
                     transition={{ duration: 0.75, delay: wi * 0.12, ease: [0.22, 1, 0.36, 1] }}
-                    className={`block text-6xl sm:text-7xl lg:text-[88px] font-black leading-[0.9] tracking-[-0.02em] ${wi === content.gold ? 'text-gold' : 'text-white'}`}
+                    className={`block text-6xl sm:text-7xl lg:text-[88px] font-black leading-[0.9] tracking-[-0.02em] ${
+                      wi === content.gold
+                        ? 'bg-clip-text text-transparent'
+                        : 'text-white'
+                    }`}
+                    style={wi === content.gold ? {
+                      backgroundImage: 'linear-gradient(135deg, #f0c040 0%, #c9a227 40%, #f5d060 70%, #c9a227 100%)',
+                      backgroundSize: '200% 200%',
+                      animation: 'gradientShift 4s ease infinite',
+                    } : {}}
                   >
                     {word}
                   </motion.div>

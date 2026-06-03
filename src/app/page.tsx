@@ -1,4 +1,5 @@
 import HeroSection from '@/components/HeroSection';
+import MarqueeTicker from '@/components/MarqueeTicker';
 import ValuesSection from '@/components/ValuesSection';
 import ManifestoSection from '@/components/ManifestoSection';
 import StatsSection from '@/components/StatsSection';
@@ -14,6 +15,7 @@ export default function HomePage() {
   return (
     <>
       <HeroSection />
+      <MarqueeTicker />
       <ValuesSection />
       <ManifestoSection />
       <StatsSection />
@@ -22,6 +24,7 @@ export default function HomePage() {
       <CommunitySection />
       <LeadershipSection />
       <NewsPreview />
+      <MarqueeTicker />
       <NewsletterSection />
       <JoinCTA />
     </>
