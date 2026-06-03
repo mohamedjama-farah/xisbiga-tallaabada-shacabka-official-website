@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+:root {
+  --navy: #1a2454;
+  --gold: #c9a227;
+  --red-accent: #dc2626;
+}
+
+@theme inline {
+  --color-navy: #1a2454;
+  --color-gold: #c9a227;
+  --color-red: #dc2626;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #1a2454;
+  color: white;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background-color: #c9a227;
+  color: #1a2454;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0a1128; }
+::-webkit-scrollbar-thumb { background: #c9a227; border-radius: 3px; }
+
+.text-gold { color: #c9a227; }
+.bg-gold { background-color: #c9a227; }
+.bg-navy { background-color: #1a2454; }
+.text-navy { color: #1a2454; }
+.border-gold { border-color: #c9a227; }
+.shadow-gold { --tw-shadow-color: #c9a227; }
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.admin-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 0.625rem;
+  color: white;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.admin-input:focus {
+  border-color: rgba(201,162,39,0.4);
+}
+.admin-input option {
+  background: #0a1128;
+  color: white;
+}

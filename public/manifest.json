@@ -1,0 +1,22 @@
+{
+  "name": "Xisbiga Tallaabada Shacabka — XTS",
+  "short_name": "XTS Party",
+  "description": "A new political movement for justice, unity, and progress for all Somali people.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a2454",
+  "theme_color": "#c9a227",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/logo.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "categories": ["politics", "news", "government"],
+  "lang": "so",
+  "shortcuts": [
+    { "name": "Join XTS", "url": "/join", "description": "Become a party member" },
+    { "name": "Donate", "url": "/donate", "description": "Support the movement" },
+    { "name": "Events", "url": "/events", "description": "Upcoming events" },
+    { "name": "News", "url": "/news", "description": "Latest news" }
+  ]
+}

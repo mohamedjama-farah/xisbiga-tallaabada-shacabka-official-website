@@ -1,0 +1,259 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Member {
+  id        String       @id @default(cuid())
+  firstName String
+  lastName  String
+  email     String       @unique
+  phone     String?
+  city      String?
+  message   String?
+  status    MemberStatus @default(PENDING)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model NewsPost {
+  id        String   @id @default(cuid())
+  titleEn   String
+  titleSo   String
+  contentEn String
+  contentSo String
+  excerpt   String?
+  imageUrl  String?
+  published Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model AdminUser {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  password  String
+  name      String
+  role      AdminRole @default(EDITOR)
+  createdAt DateTime  @default(now())
+}
+
+enum MemberStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  MEDIA_ADMIN
+  MEMBERS_ADMIN
+  EDITOR
+}
+
+model Donation {
+  id            String   @id @default(cuid())
+  fullName      String
+  phone         String
+  email         String?
+  amount        Float
+  currency      String   @default("USD")
+  method        String
+  message       String?
+  transactionId String?
+  status        String   @default("PENDING")
+  createdAt     DateTime @default(now())
+}
+
+model Event {
+  id        String   @id @default(cuid())
+  titleEn   String
+  titleSo   String
+  descEn    String
+  descSo    String
+  location  String
+  date      DateTime
+  time      String?
+  type      String   @default("OTHER")
+  online    Boolean  @default(false)
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Volunteer {
+  id           String   @id @default(cuid())
+  firstName    String
+  lastName     String
+  email        String?
+  phone        String
+  city         String
+  region       String?
+  skills       String[] // e.g. ["social_media","translation","driving"]
+  availability String   @default("WEEKENDS")
+  message      String?
+  type         String   @default("GENERAL") // GENERAL | CANVASSER
+  // Canvasser-specific
+  district     String?
+  area         String?
+  status       String   @default("PENDING")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model MediaItem {
+  id        String   @id @default(cuid())
+  titleEn   String
+  titleSo   String
+  caption   String?
+  imageUrl  String
+  eventName String?
+  eventDate DateTime?
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model Document {
+  id          String   @id @default(cuid())
+  titleEn     String
+  titleSo     String
+  descEn      String?
+  descSo      String?
+  fileUrl     String
+  category    String   @default("GENERAL") // GENERAL | POLICY | PRESS | LEGAL | CONSTITUTION
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AdminNotification {
+  id        String   @id @default(cuid())
+  type      String   // member_join | donation | message | contact
+  title     String
+  body      String
+  link      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Complaint {
+  id        String   @id @default(cuid())
+  fullName  String
+  phone     String?
+  email     String?
+  city      String
+  category  String   @default("GENERAL")
+  subject   String
+  body      String
+  status    String   @default("OPEN") // OPEN | IN_PROGRESS | RESOLVED | CLOSED
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Poll {
+  id          String       @id @default(cuid())
+  questionEn  String
+  questionSo  String
+  active      Boolean      @default(true)
+  endsAt      DateTime?
+  options     PollOption[]
+  createdAt   DateTime     @default(now())
+}
+
+model PollOption {
+  id     String     @id @default(cuid())
+  labelEn String
+  labelSo String
+  poll   Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  pollId String
+  votes  PollVote[]
+}
+
+model PollVote {
+  id       String     @id @default(cuid())
+  option   PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  optionId String
+  ip       String
+  createdAt DateTime  @default(now())
+  @@unique([optionId, ip])
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  city      String?
+  createdAt DateTime @default(now())
+}
+
+model EventRSVP {
+  id        String   @id @default(cuid())
+  eventId   String
+  name      String
+  phone     String
+  email     String?
+  createdAt DateTime @default(now())
+  @@unique([eventId, phone])
+}
+
+model Petition {
+  id          String            @id @default(cuid())
+  titleEn     String
+  titleSo     String
+  descEn      String
+  descSo      String
+  goal        Int               @default(1000)
+  active      Boolean           @default(true)
+  createdAt   DateTime          @default(now())
+  signatures  PetitionSignature[]
+}
+
+model PetitionSignature {
+  id         String   @id @default(cuid())
+  petition   Petition @relation(fields: [petitionId], references: [id], onDelete: Cascade)
+  petitionId String
+  name       String
+  city       String
+  ip         String
+  createdAt  DateTime @default(now())
+  @@unique([petitionId, ip])
+}
+
+model Candidate {
+  id           String   @id @default(cuid())
+  firstName    String
+  lastName     String
+  email        String?
+  phone        String?
+  level        String   // FEDERAL_UPPER, FEDERAL_LOWER, STATE
+  state        String?
+  region       String?
+  district     String?
+  subdistrict  String?
+  constituency String?
+  notes        String?
+  status       String   @default("ACTIVE")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model SiteSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}

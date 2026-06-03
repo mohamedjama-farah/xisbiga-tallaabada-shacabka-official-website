@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Block admin and private API routes from all crawlers
+Disallow: /admin/
+Disallow: /api/admin/
+Disallow: /api/auth/
+
+Sitemap: https://xts-party.so/sitemap.xml
